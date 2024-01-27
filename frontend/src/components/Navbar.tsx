@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoClose } from "react-icons/io5";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const navigateTo = (path: string) => () => {
+    setIsOpen(false);
+    navigate(path);
+  };
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -28,7 +35,9 @@ function Navbar() {
       <div></div>
 
       <div className="m-auto">
-        <h1 className="font-bold text-3xl">DoorHinge</h1>
+        <button onClick={navigateTo("/")} className="font-bold text-3xl">
+          DoorHinge
+        </button>
       </div>
 
       <div className="h-full text-4xl">
@@ -46,16 +55,37 @@ function Navbar() {
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <p className="p-4">Profile</p>
-          <p className="p-4">Favorites</p>
-          <p className="p-4">Messages</p>
+          <button onClick={navigateTo("/profile")} className="p-4">
+            Profile
+          </button>
+          <button onClick={navigateTo("/favorites")} className="p-4">
+            Favorites
+          </button>
+          <button onClick={navigateTo("/messages")} className="p-4">
+            Messages
+          </button>
         </div>
 
         {/* Desktop Menu */}
         <div className="hidden lg:flex lg:justify-evenly lg:items-center lg:h-full lg:text-xl">
-          <p>Messages</p>
-          <p>Favorites</p>
-          <p>Profile</p>
+          <button
+            onClick={navigateTo("/profile")}
+            className="p-4 hover:text-gray-400"
+          >
+            Profile
+          </button>
+          <button
+            onClick={navigateTo("/favorites")}
+            className="p-4 hover:text-gray-400"
+          >
+            Favorites
+          </button>
+          <button
+            onClick={navigateTo("/messages")}
+            className="p-4 hover:text-gray-400"
+          >
+            Messages
+          </button>
         </div>
       </div>
     </section>
