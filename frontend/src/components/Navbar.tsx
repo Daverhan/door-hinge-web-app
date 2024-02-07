@@ -31,7 +31,7 @@ function Navbar() {
   }, []);
 
   return (
-    <section className="grid grid-cols-[30%_40%_30%] h-16 bg-white fixed w-full top-0">
+    <section className="grid grid-cols-[30%_40%_30%] h-16 bg-white fixed w-full top-0 z-10">
       <div></div>
 
       <div className="m-auto">
