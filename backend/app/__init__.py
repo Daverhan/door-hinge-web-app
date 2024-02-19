@@ -1,12 +1,15 @@
 from flask import Flask
 from app.routes.users import user_bp
 from app.database import db
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///project.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 
     db.init_app(app)
 
