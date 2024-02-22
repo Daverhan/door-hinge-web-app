@@ -35,7 +35,7 @@ function Navbar() {
       <div></div>
 
       <div className="m-auto">
-        <button onClick={navigateTo("/")} className="font-bold text-3xl">
+        <button onClick={navigateTo("/home")} className="font-bold text-3xl">
           DoorHinge
         </button>
       </div>
