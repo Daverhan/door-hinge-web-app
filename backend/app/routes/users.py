@@ -9,6 +9,7 @@ user_bp = Blueprint('user', __name__)
 def get_users():
     users = User.query.all()
     users_data = [user.to_dict() for user in users]
+
     return jsonify(users_data)
 
 
@@ -26,43 +27,52 @@ def get_user(user_id):
 def create_user():
     user_json = request.get_json()
 
-    if 'first_name' in user_json and 'last_name' in user_json:
-        user = User(first_name=user_json['first_name'],
-                    last_name=user_json['last_name'])
+    required_fields = ['first_name', 'last_name',
+                       'email', 'username', 'password']
+
+    if all(field in user_json for field in required_fields):
+        user_data = {field: user_json[field] for field in required_fields}
+        user = User(**user_data)
+
         db.session.add(user)
         db.session.commit()
-        return jsonify({'message': 'User created sucessfully', 'first_name': user.first_name, 'last_name': user.last_name}), 200
 
-    return jsonify({'error': 'User must have a first name and last name'}), 400
+        return jsonify({'message': 'User created sucessfully', **user.to_dict()}), 200
+
+    return jsonify({'error': 'Missing required fields'}), 400
 
 
 @user_bp.route('<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     user_json = request.get_json()
+    user = User.query.get(user_id)
 
-    if 'first_name' in user_json or 'last_name' in user_json:
-        user = User.query.get(user_id)
+    updatable_fields = ['first_name', 'last_name',
+                        'email', 'username', 'password']
 
-        if user:
-            if 'first_name' in user_json:
-                user.first_name = user_json['first_name']
-            if 'last_name' in user_json:
-                user.last_name = user_json['last_name']
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
 
-            db.session.commit()
-            return jsonify({'message': 'User updated successfully', 'first_name': user.first_name, 'last_name': user.last_name}), 200
-        else:
-            return jsonify({'error': 'User not found'}), 404
-    else:
-        return jsonify({'message': 'A first name and/or last name is required to update a user'}), 400
+    if not any(field in user_json for field in updatable_fields):
+        return jsonify({'message': 'At least one updatable field must be provided'})
+
+    for field in updatable_fields:
+        if field in user_json:
+            setattr(user, field, user_json[field])
+
+    db.session.commit()
+
+    return jsonify({'message': 'User updated successfully', **user.to_dict()}), 200
 
 
 @user_bp.route('<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
     user = User.query.get(user_id)
+
     if user:
         db.session.delete(user)
         db.session.commit()
+
         return jsonify({'message': 'User deleted successfully'}), 200
     else:
         return jsonify({'error': 'User not found'}), 404
