@@ -7,6 +7,9 @@ module.exports = withMT({
       home_1: "url('/src/assets/1.jpg')",
       home_2: "url('/src/assets/2.jpg')",
       home_3: "url('/src/assets/3.jpg')",
+      screens: {
+        "3xl": "1920px",
+      },
     },
   },
   plugins: [],

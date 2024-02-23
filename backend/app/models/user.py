@@ -1,4 +1,11 @@
+from datetime import datetime
 from app.database import db
+
+user_chat_association = db.Table('user_chat',
+                                 db.Column('user_id', db.Integer, db.ForeignKey(
+                                     'user.id'), primary_key=True),
+                                 db.Column('chat_id', db.Integer, db.ForeignKey(
+                                     'chat.id'), primary_key=True))
 
 
 class User(db.Model):
@@ -8,6 +15,9 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False)
     username = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(50), nullable=False)
+    chats = db.relationship('Chat', secondary=user_chat_association,
+                            backref=db.backref('users', lazy='dynamic'))
+    sent_messages = db.relationship('Message', backref='sender')
 
     def to_dict(self):
         return {
@@ -16,7 +26,8 @@ class User(db.Model):
             'last_name': self.last_name,
             'email': self.email,
             'username': self.username,
-            'password': self.password
+            'password': self.password,
+            'chats': [chat.to_dict() for chat in self.chats]
         }
 
 
@@ -89,15 +100,17 @@ class Listing(db.Model):
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(500), nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
             'content': self.content,
             'timestamp': self.timestamp,
-            'chat_id': self.chat_id
+            'chat_id': self.chat_id,
+            'sender_id': self.sender_id
         }
 
 
@@ -109,5 +122,5 @@ class Chat(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'messages': [Message.to_dict() for Message in self.messages]
+            'messages': [message.to_dict() for message in self.messages]
         }
