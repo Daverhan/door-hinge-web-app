@@ -5,9 +5,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=True)
-    username = db.Column(db.String(50), nullable=True)
-    password = db.Column(db.String(50), nullable=True)
+    email = db.Column(db.String(50), nullable=False)
+    username = db.Column(db.String(50), nullable=False)
+    password = db.Column(db.String(50), nullable=False)
 
     def to_dict(self):
         return {
@@ -28,7 +28,7 @@ class Address(db.Model):
     state = db.Column(db.String(10), nullable=False)
     zip_code = db.Column(db.Integer, nullable=False)
     listing_id = db.Column(db.Integer, db.ForeignKey(
-        'listing.id'))
+        'listing.id'), nullable=False)
 
     def to_dict(self):
         return {
@@ -45,7 +45,7 @@ class Address(db.Model):
 class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey(
-        'listing.id'))
+        'listing.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     path = db.Column(db.String(50), nullable=False)
 
@@ -90,7 +90,7 @@ class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.String(500), nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False)
-    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
 
     def to_dict(self):
         return {
