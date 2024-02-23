@@ -51,9 +51,8 @@ function Navbar() {
 
         {/* Mobile Menu */}
         <div
-          className={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${
-            isOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+          className={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
         >
           <button onClick={navigateTo("/profile")} className="p-4">
             Profile
@@ -63,6 +62,9 @@ function Navbar() {
           </button>
           <button onClick={navigateTo("/messages")} className="p-4">
             Messages
+          </button>
+          <button className="p-4">
+            Logout
           </button>
         </div>
 
@@ -85,6 +87,11 @@ function Navbar() {
             className="p-4 hover:text-gray-400"
           >
             Messages
+          </button>
+          <button
+            className="p-4 hover:text-gray-400"
+          >
+            Logout
           </button>
         </div>
       </div>
