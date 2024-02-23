@@ -20,12 +20,14 @@ function Welcome() {
 
       <div className="absolute inset-0 flex items-center justify-center">
         <button
-          onClick={navigateTo("/home")}
+          onClick={navigateTo("/login")}
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
         >
           Log In
         </button>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36">
+        <button
+          onClick={navigateTo("/makeaccount")}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36">
           Sign Up
         </button>
       </div>
