@@ -1,8 +1,16 @@
 from flask import Blueprint, jsonify, request
-from app.models.user import User, Chat, user_chat_association, Message
+from app.models.user import User, Listing, Chat, Message, user_chat_association
 from app.database import db
 
 user_bp = Blueprint('user', __name__)
+
+
+@user_bp.route('', methods=['GET'])
+def get_listings():
+    listings = Listing.query.all()
+    listings_data = [listing.to_dict() for listing in listings]
+
+    return jsonify(listings_data)
 
 
 @user_bp.route('', methods=['GET'])
