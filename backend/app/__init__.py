@@ -1,5 +1,7 @@
 from flask import Flask
+from flask_migrate import Migrate
 from app.routes.users import user_bp
+from app.routes.listings import listing_bp
 from app.database import db
 from dotenv import load_dotenv
 import os
@@ -12,10 +14,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
 
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
-
-    with app.app_context():
-        db.create_all()
+    app.register_blueprint(listing_bp, url_prefix='/api/listings')
 
     return app
