@@ -37,7 +37,7 @@ class User(db.Model):
             'username': self.username,
             'password': self.password,
             'listings': [listing.to_dict() for listing in self.listings],
-            'favorited_listings': [listing.to_dict() for listing in self.listings],
+            'favorited_listings': [listing.to_dict() for listing in self.favorited_listings],
             'chats': [chat.to_dict() for chat in self.chats]
         }
 
@@ -97,6 +97,7 @@ class Listing(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
+            'name': self.name,
             'user_id': self.user_id,
             'desc': self.desc,
             'price': self.price,
