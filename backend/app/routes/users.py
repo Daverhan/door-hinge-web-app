@@ -6,14 +6,6 @@ user_bp = Blueprint('user', __name__)
 
 
 @user_bp.route('', methods=['GET'])
-def get_listings():
-    listings = Listing.query.all()
-    listings_data = [listing.to_dict() for listing in listings]
-
-    return jsonify(listings_data)
-
-
-@user_bp.route('', methods=['GET'])
 def get_users():
     users = User.query.all()
     users_data = [user.to_dict() for user in users]
