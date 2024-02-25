@@ -26,6 +26,7 @@ class User(db.Model):
     favorited_listings = db.relationship('Listing', secondary=user_listing_association,
                                          backref=db.backref('users', lazy='dynamic'))
     sent_messages = db.relationship('Message', backref='sender')
+    listings = db.relationship('Listing', backref='user')
 
     def to_dict(self):
         return {
@@ -35,6 +36,8 @@ class User(db.Model):
             'email': self.email,
             'username': self.username,
             'password': self.password,
+            'listings': [listing.to_dict() for listing in self.listings],
+            'favorited_listings': [listing.to_dict() for listing in self.listings],
             'chats': [chat.to_dict() for chat in self.chats]
         }
 
@@ -79,7 +82,7 @@ class Image(db.Model):
 
 class Listing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    lister_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
     desc = db.Column(db.String(500), nullable=False)
     price = db.Column(db.Integer, nullable=False)
@@ -94,7 +97,7 @@ class Listing(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'lister_id': self.lister_id,
+            'user_id': self.user_id,
             'desc': self.desc,
             'price': self.price,
             'num_beds': self.num_beds,

@@ -27,7 +27,7 @@ def get_listing(listing_id):
 def create_listing():
     listing_json = request.get_json()
 
-    listing_fields = ['lister_id', 'name', 'desc',
+    listing_fields = ['user_id', 'name', 'desc',
                       'price', 'num_beds', 'num_baths', 'sqft']
     address_fields = ['house_num', 'street_name', 'city', 'state', 'zip_code']
 
@@ -60,7 +60,7 @@ def update_listing(listing_id):
     listing_json = request.get_json()
     listing = Listing.query.get(listing_id)
 
-    updatable_fields = ['lister_id', 'name', 'desc',
+    updatable_fields = ['user_id', 'name', 'desc',
                         'price', 'num_beds', 'num_baths', 'sqft']
 
     if not listing:
