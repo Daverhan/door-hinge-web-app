@@ -51,48 +51,46 @@ function Navbar() {
 
         {/* Mobile Menu */}
         <div
-          className={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+          className={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
         >
-          <button onClick={navigateTo("/profile")} className="p-4">
+          <button onClick={navigateTo("/profile")} className="flex p-3 w-full">
             Profile
           </button>
-          <button onClick={navigateTo("/favorites")} className="p-4">
+          <button
+            onClick={navigateTo("/favorites")}
+            className="flex p-3 w-full"
+          >
             Favorites
           </button>
-          <button onClick={navigateTo("/messages")} className="p-4">
+          <button onClick={navigateTo("/messages")} className="flex p-3 w-full">
             Messages
           </button>
-          <button className="p-4">
-            Logout
-          </button>
+          <button className="flex p-3 w-full">Logout</button>
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:flex lg:justify-evenly lg:items-center lg:h-full lg:text-xl">
+        <div className="hidden lg:flex lg:justify-end 2xl:justify-evenly lg:items-center lg:h-full lg:text-xl">
           <button
             onClick={navigateTo("/profile")}
-            className="p-4 hover:text-gray-400"
+            className="p-3 hover:text-gray-400"
           >
             Profile
           </button>
           <button
             onClick={navigateTo("/favorites")}
-            className="p-4 hover:text-gray-400"
+            className="p-3 hover:text-gray-400"
           >
             Favorites
           </button>
           <button
             onClick={navigateTo("/messages")}
-            className="p-4 hover:text-gray-400"
+            className="p-3 hover:text-gray-400"
           >
             Messages
           </button>
-          <button
-            className="p-4 hover:text-gray-400"
-          >
-            Logout
-          </button>
+          <button className="p-3 hover:text-gray-400">Logout</button>
         </div>
       </div>
     </section>
