@@ -35,10 +35,10 @@ function Home() {
   const [listingData, setListingData] = useState<Listing | null>(null);
   const [listerData, setListerData] = useState<User | null>(null);
   const [index, setIndex] = useState(0);
-  const listingIds = [1, 3, 4, 5, 6, 7];
+  const listingIds = [1, 2]; // hardcoded listing IDs for now to test functionality
 
   const getNextIndex = () => {
-    const nextIndex = (index + 1) % 6;
+    const nextIndex = (index + 1) % listingIds.length;
     setIndex(nextIndex);
   };
 
@@ -103,7 +103,8 @@ function Home() {
             <p>
               Address: {listingData?.addresses[0].house_num}{" "}
               {listingData?.addresses[0].street_name},{" "}
-              {listingData?.addresses[0].state},{" "}
+              {listingData?.addresses[0].city},{" "}
+              {listingData?.addresses[0].state}{" "}
               {listingData?.addresses[0].zip_code}
             </p>
             <p>Price: ${listingData?.price}</p>
