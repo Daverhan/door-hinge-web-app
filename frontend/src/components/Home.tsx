@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 import { Carousel } from "@material-tailwind/react";
-import Home_1 from "../assets/1.jpg";
-import Home_2 from "../assets/2.jpg";
-import Home_3 from "../assets/3.jpg";
 
 interface Address {
   id: number;
@@ -12,6 +9,11 @@ interface Address {
   city: string;
   state: string;
   zip_code: number;
+}
+
+interface Image {
+  id: number;
+  path: string;
 }
 
 interface Listing {
@@ -24,6 +26,7 @@ interface Listing {
   num_baths: number;
   sqft: number;
   addresses: Address[];
+  images: Image[];
 }
 
 interface User {
@@ -35,7 +38,8 @@ function Home() {
   const [listingData, setListingData] = useState<Listing | null>(null);
   const [listerData, setListerData] = useState<User | null>(null);
   const [index, setIndex] = useState(0);
-  const listingIds = [1, 2]; // hardcoded listing IDs for now to test functionality
+  const listingIds = [1, 2, 3]; // hardcoded listing IDs for now to test functionality
+  const [carouselKey, setCarouselKey] = useState(0);
 
   const getNextIndex = () => {
     const nextIndex = (index + 1) % listingIds.length;
@@ -47,6 +51,7 @@ function Home() {
       fetch(`/api/listings/${listingIds[index]}`)
         .then((response) => response.json())
         .then((json) => setListingData(json as Listing));
+      setCarouselKey((carouselKey + 1) % 10);
     } catch (error) {
       console.error("Failed to fetch listing: ", error);
     }
@@ -74,26 +79,23 @@ function Home() {
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-full">
           <div>
-            <Carousel
-              className="z-0"
-              placeholder={<p className="text-3xl">Loading...</p>}
-            >
-              <img
-                src={Home_1}
-                alt="image 1"
-                className="h-full w-full object-fill"
-              />
-              <img
-                src={Home_2}
-                alt="image 2"
-                className="h-full w-full object-fill"
-              />
-              <img
-                src={Home_3}
-                alt="image 3"
-                className="h-full w-full object-fill"
-              />
-            </Carousel>
+            {listingData?.images ? (
+              <Carousel
+                key={carouselKey}
+                loop={true}
+                className="z-0"
+                placeholder={<p className="text-3xl">Loading...</p>}
+              >
+                {listingData?.images.map((image) => (
+                  <img
+                    key={image.id}
+                    src={"http://localhost:5000" + image.path}
+                    alt={`image ${image.id}`}
+                    className="h-full w-full object-fill"
+                  />
+                ))}
+              </Carousel>
+            ) : null}
           </div>
           <div className="flex flex-col bg-green-300 pl-2 pt-2 items-left overflow-hidden break-words">
             <p>

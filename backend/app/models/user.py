@@ -1,5 +1,6 @@
 from datetime import datetime
 from app.database import db
+from flask import url_for
 
 user_chat_association = db.Table('user_chat',
                                  db.Column('user_id', db.Integer, db.ForeignKey(
@@ -68,15 +69,15 @@ class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     listing_id = db.Column(db.Integer, db.ForeignKey(
         'listing.id'), nullable=False)
-    name = db.Column(db.String(50), nullable=False)
-    path = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    path = db.Column(db.String(1024), nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
             'listing_id': self.listing_id,
             'name': self.name,
-            'path': self.path
+            'path': url_for('static', filename=self.path)
         }
 
 

@@ -1,8 +1,13 @@
-from flask import Blueprint, jsonify, request
-from app.models.user import Listing, Address
+from flask import Blueprint, jsonify, request, url_for
+from app.models.user import Listing, Address, Image
 from app.database import db
 
 listing_bp = Blueprint('listing', __name__)
+
+
+@listing_bp.route('<int:listing_id>/images', methods=['POST'])
+def upload_image(listing_id):
+    pass
 
 
 @listing_bp.route('', methods=['GET'])
