@@ -71,13 +71,13 @@ function Home() {
 
   return (
     <section className="h-screen pt-16">
-      <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-full">
+      <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
         <div className="hidden lg:flex h-full w-full justify-center items-center bg-blue-100">
           <p className="break-words mx-4">
             This section can be used to filter for properties
           </p>
         </div>
-        <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-full">
+        <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>
             {listingData?.images ? (
               <Carousel
@@ -91,7 +91,7 @@ function Home() {
                     key={image.id}
                     src={"http://localhost:5000" + image.path}
                     alt={`image ${image.id}`}
-                    className="h-full w-full object-fill"
+                    className="object-cover h-full w-full"
                   />
                 ))}
               </Carousel>
