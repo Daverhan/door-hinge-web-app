@@ -71,13 +71,13 @@ function Home() {
 
   return (
     <section className="h-screen pt-16">
-      <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-full">
+      <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
         <div className="hidden lg:flex h-full w-full justify-center items-center bg-blue-100">
           <p className="break-words mx-4">
             This section can be used to filter for properties
           </p>
         </div>
-        <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-full">
+        <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>
             {listingData?.images ? (
               <Carousel
@@ -91,13 +91,13 @@ function Home() {
                     key={image.id}
                     src={"http://localhost:5000" + image.path}
                     alt={`image ${image.id}`}
-                    className="h-full w-full object-fill"
+                    className="object-cover h-full w-full"
                   />
                 ))}
               </Carousel>
             ) : null}
           </div>
-          <div className="flex flex-col bg-green-300 pl-2 pt-2 items-left overflow-hidden break-words">
+          <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words">
             <p>
               Listing posted by: {listerData?.first_name}{" "}
               {listerData?.last_name}
@@ -117,11 +117,17 @@ function Home() {
             <p>{listingData?.sqft} SQFT</p>
           </div>
           <div className="flex justify-evenly items-center bg-orange-300">
-            <button onClick={getNextIndex} className="text-3xl">
-              No
+            <button
+              onClick={getNextIndex}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold w-full h-full text-2xl"
+            >
+              Pass
             </button>
-            <button onClick={getNextIndex} className="text-3xl">
-              Yes
+            <button
+              onClick={getNextIndex}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold w-full h-full text-2xl"
+            >
+              Favorite
             </button>
           </div>
         </div>
