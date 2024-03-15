@@ -5,3 +5,4 @@ python-dotenv==1.0.1
 cryptography==42.0.3
 Flask-Migrate==4.0.5
 Flask-Bcrypt==1.0.1
+Flask-Session==0.6.0

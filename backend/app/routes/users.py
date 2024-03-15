@@ -1,8 +1,20 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
 from app.extensions import db, bcrypt
 
 user_bp = Blueprint('user', __name__)
+
+
+@user_bp.route('profile', methods=['GET'])
+def get_current_user():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user = User.query.filter_by(id=user_id).first()
+
+    return jsonify({'id': user.id, 'username': user.username})
 
 
 @user_bp.route('', methods=['GET'])
@@ -27,15 +39,20 @@ def get_user(user_id):
 def login_user():
     user_credentials_json = request.get_json()
 
-    username = user_credentials_json['username']
-    password = user_credentials_json['password']
+    if 'username' not in user_credentials_json or 'password' not in user_credentials_json:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    username = user_credentials_json.get('username')
+    password = user_credentials_json.get('password')
 
     user = User.query.filter_by(username=username).first()
 
     if not user or not bcrypt.check_password_hash(user.password, password):
         return jsonify({'error': 'Invalid username or password'}), 401
 
-    return jsonify({'message': 'Successfully logged in', 'username': user.username, 'password': user.password})
+    session['user_id'] = user.id
+
+    return jsonify({'message': 'Successfully logged in', 'id': user.id, 'username': user.username}), 200
 
 
 @user_bp.route('', methods=['POST'])
