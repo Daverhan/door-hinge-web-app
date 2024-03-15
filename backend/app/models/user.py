@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.database import db
+from app.extensions import db
 from flask import url_for
 
 user_chat_association = db.Table('user_chat',
@@ -17,11 +17,11 @@ user_listing_association = db.Table('user_listing',
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(50), nullable=False)
-    last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=False)
-    username = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(50), nullable=False)
+    first_name = db.Column(db.String(64), nullable=False)
+    last_name = db.Column(db.String(64), nullable=False)
+    email = db.Column(db.String(320), nullable=False)
+    username = db.Column(db.String(64), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     chats = db.relationship('Chat', secondary=user_chat_association,
                             backref=db.backref('users', lazy='dynamic'))
     favorited_listings = db.relationship('Listing', secondary=user_listing_association,

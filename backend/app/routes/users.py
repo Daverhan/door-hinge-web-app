@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
-from app.database import db
+from app.extensions import db, bcrypt
 
 user_bp = Blueprint('user', __name__)
 
@@ -23,21 +23,45 @@ def get_user(user_id):
     return jsonify(user.to_dict()), 200
 
 
+@user_bp.route('login', methods=['POST'])
+def login_user():
+    user_credentials_json = request.get_json()
+
+    username = user_credentials_json['username']
+    password = user_credentials_json['password']
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({'error': 'Invalid username or password'}), 401
+
+    return jsonify({'message': 'Successfully logged in', 'username': user.username, 'password': user.password})
+
+
 @user_bp.route('', methods=['POST'])
-def create_user():
+def register_user():
     user_json = request.get_json()
 
     required_fields = ['first_name', 'last_name',
                        'email', 'username', 'password']
 
     if all(field in user_json for field in required_fields):
+        user_exists = User.query.filter_by(
+            email=user_json['email']).first() is not None or User.query.filter_by(username=user_json['username']).first() is not None
+
+        if user_exists:
+            return jsonify({'error': 'A user already exists with the provided username or email'}), 409
+
+        user_json['password'] = bcrypt.generate_password_hash(
+            user_json['password'])
+
         user_data = {field: user_json[field] for field in required_fields}
         user = User(**user_data)
 
         db.session.add(user)
         db.session.commit()
 
-        return jsonify({'message': 'User created sucessfully', **user.to_dict()}), 200
+        return jsonify({'message': 'User created successfully', **user.to_dict()}), 200
 
     return jsonify({'error': 'Missing required fields'}), 400
 

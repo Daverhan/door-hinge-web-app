@@ -2,7 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from app.routes.users import user_bp
 from app.routes.listings import listing_bp
-from app.database import db
+from app.extensions import db, bcrypt
 from dotenv import load_dotenv
 import os
 
@@ -15,6 +15,7 @@ def create_app():
 
     db.init_app(app)
     migrate = Migrate(app, db)
+    bcrypt.init_app(app)
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
     app.register_blueprint(listing_bp, url_prefix='/api/listings')

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, url_for
 from app.models.user import Listing, Address, Image
-from app.database import db
+from app.extensions import db
 
 listing_bp = Blueprint('listing', __name__)
 
