@@ -97,7 +97,7 @@ function Home() {
               </Carousel>
             ) : null}
           </div>
-          <div className="flex flex-col bg-green-300 pl-2 pt-2 items-left overflow-hidden break-words">
+          <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words">
             <p>
               Listing posted by: {listerData?.first_name}{" "}
               {listerData?.last_name}
@@ -117,11 +117,17 @@ function Home() {
             <p>{listingData?.sqft} SQFT</p>
           </div>
           <div className="flex justify-evenly items-center bg-orange-300">
-            <button onClick={getNextIndex} className="text-3xl">
-              No
+            <button
+              onClick={getNextIndex}
+              className="bg-red-500 hover:bg-red-700 text-white font-bold w-full h-full text-2xl"
+            >
+              Pass
             </button>
-            <button onClick={getNextIndex} className="text-3xl">
-              Yes
+            <button
+              onClick={getNextIndex}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold w-full h-full text-2xl"
+            >
+              Favorite
             </button>
           </div>
         </div>
