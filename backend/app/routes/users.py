@@ -78,6 +78,8 @@ def register_user():
         db.session.add(user)
         db.session.commit()
 
+        session['user_id'] = user.id
+
         return jsonify({'message': 'User created successfully', **user.to_dict()}), 200
 
     return jsonify({'error': 'Missing required fields'}), 400
