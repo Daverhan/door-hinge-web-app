@@ -1,11 +1,59 @@
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [error401Flag, setError401Flag] = useState(false);
+  const [emptyInputFlag, setEmptyInputFlag] = useState(false);
+
   const navigate = useNavigate();
 
   const navigateTo = (path: string) => () => {
     navigate(path);
   };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!formRef.current) {
+      return;
+    }
+
+    let emptyInputFields = false;
+    e.preventDefault();
+
+    const formData = new FormData(formRef.current);
+
+    const formValues = {
+      username: formData.get("username"),
+      password: formData.get("password"),
+    };
+
+    Object.values(formValues).forEach((value) => {
+      if (!value) {
+        setEmptyInputFlag(true);
+        setError401Flag(false);
+        emptyInputFields = true;
+      }
+    });
+
+    if (emptyInputFields) {
+      return;
+    } else {
+      setEmptyInputFlag(false);
+    }
+
+    fetch("/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formValues),
+    }).then((response) => {
+      if (response.status === 401) {
+        setError401Flag(true);
+      } else {
+        navigate("/home");
+      }
+    });
+  };
+
   return (
     <section className="bg-blue-100 h-screen pt-16">
       <div>
@@ -22,8 +70,12 @@ function Login() {
           <p>Find your dream match</p>
         </div>
         <div className="hidden lg:flex h-full w-full justify-center items-center">
-          <form className="w-full max-w-lg py-3 px-5 bg-gray-100 rounded ">
-            <div className="flex flex-wrap -mx-3 mb-6å">
+          <form
+            ref={formRef}
+            onSubmit={handleSubmit}
+            className="w-full max-w-lg py-3 px-5 bg-gray-100 rounded "
+          >
+            <div className="flex flex-wrap -mx-3">
               <div className="w-full px-3">
                 <label
                   htmlFor="username"
@@ -54,10 +106,17 @@ function Login() {
                 ></input>
               </div>
             </div>
-            <button
-              onClick={navigateTo("/home")}
-              className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
-            >
+            {error401Flag ? (
+              <p className="text-2xl text-center mb-2 text-red-500">
+                Invalid username or password
+              </p>
+            ) : null}
+            {emptyInputFlag ? (
+              <p className="text-2xl text-center mb-2 text-red-500">
+                Input fields cannot be empty
+              </p>
+            ) : null}
+            <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
               Log In
             </button>
             <div className="py-1"></div>

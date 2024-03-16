@@ -2,13 +2,17 @@ import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function MakeAccount() {
-  const formRef = useRef();
+  const formRef = useRef<HTMLFormElement>(null);
   const [error409Flag, setError409Flag] = useState(false);
   const [emptyInputFlag, setEmptyInputFlag] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!formRef.current) {
+      return;
+    }
+
     let emptyInputFields = false;
     e.preventDefault();
 

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, session
+from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
 from app.extensions import db, bcrypt
 
@@ -14,7 +14,7 @@ def get_current_user():
 
     user = User.query.filter_by(id=user_id).first()
 
-    return jsonify({'id': user.id, 'username': user.username})
+    return jsonify({'id': user.id, 'username': user.username, 'first_name': user.first_name, 'last_name': user.last_name})
 
 
 @user_bp.route('', methods=['GET'])
@@ -33,6 +33,14 @@ def get_user(user_id):
         return jsonify({'error': 'User not found'}), 404
 
     return jsonify(user.to_dict()), 200
+
+
+@user_bp.route('logout', methods=['POST'])
+def logout_user():
+    session.clear()
+    response = make_response()
+    response.delete_cookie('session')
+    return response
 
 
 @user_bp.route('login', methods=['POST'])

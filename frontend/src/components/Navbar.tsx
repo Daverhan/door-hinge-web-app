@@ -30,6 +30,16 @@ function Navbar() {
     };
   }, []);
 
+  const handleLogout = () => {
+    fetch("api/users/logout", {
+      method: "POST",
+    }).then((response) => {
+      if (response.ok) {
+        navigate("/");
+      }
+    });
+  };
+
   return (
     <section className="grid grid-cols-[30%_40%_30%] h-16 bg-white fixed w-full top-0 z-10">
       <div></div>
@@ -67,7 +77,9 @@ function Navbar() {
           <button onClick={navigateTo("/messages")} className="flex p-3 w-full">
             Messages
           </button>
-          <button className="flex p-3 w-full">Logout</button>
+          <button onClick={handleLogout} className="flex p-3 w-full">
+            Logout
+          </button>
         </div>
 
         {/* Desktop Menu */}
@@ -90,7 +102,9 @@ function Navbar() {
           >
             Messages
           </button>
-          <button className="p-3 hover:text-gray-400">Logout</button>
+          <button onClick={handleLogout} className="p-3 hover:text-gray-400">
+            Logout
+          </button>
         </div>
       </div>
     </section>
