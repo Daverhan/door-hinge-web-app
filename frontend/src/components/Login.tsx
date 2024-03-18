@@ -17,41 +17,42 @@ function Login() {
       return;
     }
 
-    let emptyInputFields = false;
     e.preventDefault();
 
     const formData = new FormData(formRef.current);
 
     const formValues = {
-      username: formData.get("username"),
-      password: formData.get("password"),
+      username: formData.get("username") as string,
+      password: formData.get("password") as string,
     };
 
-    Object.values(formValues).forEach((value) => {
-      if (!value) {
-        setEmptyInputFlag(true);
-        setError401Flag(false);
-        emptyInputFields = true;
-      }
-    });
+    let emptyInputFields = Object.values(formValues).some((value) => !value);
 
     if (emptyInputFields) {
+      setEmptyInputFlag(true);
+      setError401Flag(false);
       return;
-    } else {
-      setEmptyInputFlag(false);
     }
 
-    fetch("/api/users/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formValues),
-    }).then((response) => {
+    const loginUser = async () => {
+      const response = await fetch("/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formValues),
+      });
+
       if (response.status === 401) {
         setError401Flag(true);
+        setEmptyInputFlag(false);
+      } else if (!response.ok) {
+        setEmptyInputFlag(false);
+        return;
       } else {
         navigate("/home");
       }
-    });
+    };
+
+    loginUser();
   };
 
   return (
@@ -123,6 +124,7 @@ function Login() {
             <div>
               <div className="px-4"></div>
               <button
+                type="button"
                 onClick={navigateTo("/makeaccount")}
                 className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
               >
@@ -132,7 +134,7 @@ function Login() {
             </div>
             <div className="py-1"></div>
             <div className="flex justify-center">
-              <button className="text-blue-500 hover:underline">
+              <button type="button" className="text-blue-500 hover:underline">
                 Forgot Password?
               </button>
             </div>
