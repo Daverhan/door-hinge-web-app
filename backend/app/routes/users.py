@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
 from app.extensions import db, bcrypt
+from app.rbac_utilities import create_mysql_user
 
 user_bp = Blueprint('user', __name__)
 
@@ -77,11 +78,15 @@ def register_user():
         if user_exists:
             return jsonify({'error': 'A user already exists with the provided username or email'}), 409
 
+        plaintext_password = user_json['password']
+
         user_json['password'] = bcrypt.generate_password_hash(
             user_json['password'])
 
         user_data = {field: user_json[field] for field in required_fields}
         user = User(**user_data)
+
+        create_mysql_user(user_json['username'], plaintext_password, 'user')
 
         db.session.add(user)
         db.session.commit()
