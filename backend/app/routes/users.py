@@ -1,8 +1,21 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
-from app.database import db
+from app.extensions import db, bcrypt
+from app.rbac_utilities import create_mysql_user
 
 user_bp = Blueprint('user', __name__)
+
+
+@user_bp.route('profile', methods=['GET'])
+def get_current_user():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    user = User.query.filter_by(id=user_id).first()
+
+    return jsonify({'id': user.id, 'username': user.username, 'first_name': user.first_name, 'last_name': user.last_name})
 
 
 @user_bp.route('', methods=['GET'])
@@ -23,21 +36,64 @@ def get_user(user_id):
     return jsonify(user.to_dict()), 200
 
 
+@user_bp.route('logout', methods=['POST'])
+def logout_user():
+    session.clear()
+    response = make_response()
+    response.delete_cookie('session')
+    return response
+
+
+@user_bp.route('login', methods=['POST'])
+def login_user():
+    user_credentials_json = request.get_json()
+
+    if 'username' not in user_credentials_json or 'password' not in user_credentials_json:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    username = user_credentials_json.get('username')
+    password = user_credentials_json.get('password')
+
+    user = User.query.filter_by(username=username).first()
+
+    if not user or not bcrypt.check_password_hash(user.password, password):
+        return jsonify({'error': 'Invalid username or password'}), 401
+
+    session['user_id'] = user.id
+
+    return jsonify({'message': 'Successfully logged in', 'id': user.id, 'username': user.username}), 200
+
+
 @user_bp.route('', methods=['POST'])
-def create_user():
+def register_user():
     user_json = request.get_json()
 
     required_fields = ['first_name', 'last_name',
                        'email', 'username', 'password']
 
     if all(field in user_json for field in required_fields):
+        user_exists = User.query.filter_by(
+            email=user_json['email']).first() is not None or User.query.filter_by(username=user_json['username']).first() is not None
+
+        if user_exists:
+            return jsonify({'error': 'A user already exists with the provided username or email'}), 409
+
+        plaintext_password = user_json['password']
+
+        user_json['password'] = bcrypt.generate_password_hash(
+            user_json['password'])
+
         user_data = {field: user_json[field] for field in required_fields}
         user = User(**user_data)
+
+        create_mysql_user(user_json['username'], plaintext_password, 'user')
 
         db.session.add(user)
         db.session.commit()
 
-        return jsonify({'message': 'User created sucessfully', **user.to_dict()}), 200
+        session['user_id'] = user.id
+
+        return jsonify({'message': 'User created successfully', **user.to_dict()}), 200
 
     return jsonify({'error': 'Missing required fields'}), 400
 
@@ -190,9 +246,12 @@ def create_message(user_id, chat_id):
     return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
 
 
-@user_bp.route('<int:user_id>/favorite-listings', methods=['POST'])
-def favorite_a_listing_for_user(user_id):
+@user_bp.route('favorite-listings', methods=['POST'])
+def favorite_a_listing_for_user():
+    user_id = session.get('user_id')
+
     user = User.query.get(user_id)
+
     listing_id_json = request.get_json()
 
     if not user:

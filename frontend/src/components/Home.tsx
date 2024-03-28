@@ -35,39 +35,51 @@ interface User {
 }
 
 function Home() {
-  const [listingData, setListingData] = useState<Listing | null>(null);
-  const [listerData, setListerData] = useState<User | null>(null);
-  const [index, setIndex] = useState(0);
-  const listingIds = [1, 2, 3]; // hardcoded listing IDs for now to test functionality
+  const [listing, setListing] = useState<Listing | null>(null);
+  const [lister, setLister] = useState<User | null>(null);
   const [carouselKey, setCarouselKey] = useState(0);
 
-  const getNextIndex = () => {
-    const nextIndex = (index + 1) % listingIds.length;
-    setIndex(nextIndex);
+  const getNextListing = async () => {
+    const listing_response = await fetch("/api/listings/next-listing");
+
+    if (listing_response.ok) {
+      const listing = (await listing_response.json()) as Listing;
+      setListing(listing);
+
+      const lister_response = await fetch(`/api/users/${listing?.user_id}`);
+
+      if (lister_response.ok) {
+        setLister((await lister_response.json()) as User);
+        setCarouselKey((prevKey) => (prevKey + 1) % 10);
+      }
+    }
+  };
+
+  const favoriteListing = async () => {
+    const request_content = {
+      listing_id: listing?.id,
+    };
+
+    const response = await fetch(`/api/users/favorite-listings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request_content),
+    });
+
+    if (response.ok) {
+      getNextListing();
+    }
+  };
+
+  const passListing = async () => {
+    getNextListing();
   };
 
   useEffect(() => {
-    try {
-      fetch(`/api/listings/${listingIds[index]}`)
-        .then((response) => response.json())
-        .then((json) => setListingData(json as Listing));
-      setCarouselKey((carouselKey + 1) % 10);
-    } catch (error) {
-      console.error("Failed to fetch listing: ", error);
-    }
-  }, [index]);
-
-  useEffect(() => {
-    if (listingData) {
-      try {
-        fetch(`/api/users/${listingData?.user_id}`)
-          .then((response) => response.json())
-          .then((json) => setListerData(json as User));
-      } catch (error) {
-        console.error("Failed to fetch lister: ", error);
-      }
-    }
-  }, [listingData]);
+    getNextListing();
+  }, []);
 
   return (
     <section className="h-screen pt-16">
@@ -79,14 +91,14 @@ function Home() {
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>
-            {listingData?.images ? (
+            {listing?.images ? (
               <Carousel
                 key={carouselKey}
                 loop={true}
                 className="z-0"
                 placeholder={<p className="text-3xl">Loading...</p>}
               >
-                {listingData?.images.map((image) => (
+                {listing?.images.map((image) => (
                   <img
                     key={image.id}
                     src={"http://localhost:5000" + image.path}
@@ -99,32 +111,29 @@ function Home() {
           </div>
           <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words">
             <p>
-              Listing posted by: {listerData?.first_name}{" "}
-              {listerData?.last_name}
+              Listing posted by: {lister?.first_name} {lister?.last_name}
             </p>
             <p>
-              Address: {listingData?.addresses[0].house_num}{" "}
-              {listingData?.addresses[0].street_name},{" "}
-              {listingData?.addresses[0].city},{" "}
-              {listingData?.addresses[0].state}{" "}
-              {listingData?.addresses[0].zip_code}
+              Address: {listing?.addresses[0].house_num}{" "}
+              {listing?.addresses[0].street_name}, {listing?.addresses[0].city},{" "}
+              {listing?.addresses[0].state} {listing?.addresses[0].zip_code}
             </p>
-            <p>Price: ${listingData?.price}</p>
-            <p className="my-2">{listingData?.desc}</p>
+            <p>Price: ${listing?.price}</p>
+            <p className="my-2">{listing?.desc}</p>
             <p>
-              {listingData?.num_beds} BED / {listingData?.num_baths} BATH
+              {listing?.num_beds} BED / {listing?.num_baths} BATH
             </p>
-            <p>{listingData?.sqft} SQFT</p>
+            <p>{listing?.sqft} SQFT</p>
           </div>
           <div className="flex justify-evenly items-center bg-orange-300">
             <button
-              onClick={getNextIndex}
+              onClick={passListing}
               className="bg-red-500 hover:bg-red-700 text-white font-bold w-full h-full text-2xl"
             >
               Pass
             </button>
             <button
-              onClick={getNextIndex}
+              onClick={favoriteListing}
               className="bg-green-500 hover:bg-green-700 text-white font-bold w-full h-full text-2xl"
             >
               Favorite

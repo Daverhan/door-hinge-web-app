@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request, url_for
-from app.models.user import Listing, Address, Image
-from app.database import db
+from flask import Blueprint, jsonify, request, session
+from app.models.user import Listing, Address, User
+from app.extensions import db
+import random
 
 listing_bp = Blueprint('listing', __name__)
 
@@ -8,6 +9,34 @@ listing_bp = Blueprint('listing', __name__)
 @listing_bp.route('<int:listing_id>/images', methods=['POST'])
 def upload_image(listing_id):
     pass
+
+
+@listing_bp.route('next-listing', methods=['GET'])
+def get_next_listing():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'No user attached to the request'}), 400
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'error', 'User not found'}), 404
+
+    favorited_listings_ids = [
+        listing.id for listing in user.favorited_listings]
+
+    listings = Listing.query.filter(
+        Listing.user_id != user_id, Listing.id.notin_(favorited_listings_ids)).all()
+
+    if not listings:
+        return jsonify({'error': 'No available listings to show'}), 400
+
+    listings_data = [listing.to_dict() for listing in listings]
+
+    random_listing = listings_data[random.randint(0, len(listings_data) - 1)]
+
+    return jsonify(random_listing)
 
 
 @listing_bp.route('', methods=['GET'])
@@ -32,18 +61,24 @@ def get_listing(listing_id):
 def create_listing():
     listing_json = request.get_json()
 
-    listing_fields = ['user_id', 'name', 'desc',
+    listing_fields = ['name', 'desc',
                       'price', 'num_beds', 'num_baths', 'sqft']
     address_fields = ['house_num', 'street_name', 'city', 'state', 'zip_code']
+    int_fields = ['price', 'num_beds', 'num_baths',
+                  'sqft', 'house_num', 'zip_code']
+    user_id = session.get('user_id')
 
-    if not all(field in listing_json for field in listing_fields + address_fields):
+    if not all(field in listing_json for field in listing_fields + address_fields) and not user_id:
         return jsonify({'error': 'Missing required fields'}), 400
+
+    for field in int_fields:
+        listing_json[field] = int(listing_json[field])
 
     listing_data = {field: listing_json[field] for field in listing_fields}
     address_data = {field: listing_json[field] for field in address_fields}
 
     try:
-        listing = Listing(**listing_data)
+        listing = Listing(**listing_data, user_id=user_id)
         db.session.add(listing)
 
         db.session.flush()
