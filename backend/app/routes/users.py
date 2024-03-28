@@ -246,9 +246,12 @@ def create_message(user_id, chat_id):
     return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
 
 
-@user_bp.route('<int:user_id>/favorite-listings', methods=['POST'])
-def favorite_a_listing_for_user(user_id):
+@user_bp.route('favorite-listings', methods=['POST'])
+def favorite_a_listing_for_user():
+    user_id = session.get('user_id')
+
     user = User.query.get(user_id)
+
     listing_id_json = request.get_json()
 
     if not user:

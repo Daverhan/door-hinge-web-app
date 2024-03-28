@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, session
-from app.models.user import Listing, Address
+from app.models.user import Listing, Address, User
 from app.extensions import db
+import random
 
 listing_bp = Blueprint('listing', __name__)
 
@@ -8,6 +9,34 @@ listing_bp = Blueprint('listing', __name__)
 @listing_bp.route('<int:listing_id>/images', methods=['POST'])
 def upload_image(listing_id):
     pass
+
+
+@listing_bp.route('next-listing', methods=['GET'])
+def get_next_listing():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'No user attached to the request'}), 400
+
+    user = User.query.get(user_id)
+
+    if not user:
+        return jsonify({'error', 'User not found'}), 404
+
+    favorited_listings_ids = [
+        listing.id for listing in user.favorited_listings]
+
+    listings = Listing.query.filter(
+        Listing.user_id != user_id, Listing.id.notin_(favorited_listings_ids)).all()
+
+    if not listings:
+        return jsonify({'error': 'No available listings to show'}), 400
+
+    listings_data = [listing.to_dict() for listing in listings]
+
+    random_listing = listings_data[random.randint(0, len(listings_data) - 1)]
+
+    return jsonify(random_listing)
 
 
 @listing_bp.route('', methods=['GET'])
