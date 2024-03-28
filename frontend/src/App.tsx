@@ -5,6 +5,7 @@ import MakeAccount from "./components/MakeAccount";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
+import CreateListing from "./components/CreateListing";
 
 function App() {
   return (
@@ -30,6 +31,15 @@ function App() {
               <>
                 <Navbar />
                 <Profile />
+              </>
+            }
+          />
+          <Route
+            path="/create-listing"
+            element={
+              <>
+                <Navbar />
+                <CreateListing />
               </>
             }
           />

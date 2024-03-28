@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request, url_for
-from app.models.user import Listing, Address, Image
+from flask import Blueprint, jsonify, request, session
+from app.models.user import Listing, Address
 from app.extensions import db
 
 listing_bp = Blueprint('listing', __name__)
@@ -32,18 +32,24 @@ def get_listing(listing_id):
 def create_listing():
     listing_json = request.get_json()
 
-    listing_fields = ['user_id', 'name', 'desc',
+    listing_fields = ['name', 'desc',
                       'price', 'num_beds', 'num_baths', 'sqft']
     address_fields = ['house_num', 'street_name', 'city', 'state', 'zip_code']
+    int_fields = ['price', 'num_beds', 'num_baths',
+                  'sqft', 'house_num', 'zip_code']
+    user_id = session.get('user_id')
 
-    if not all(field in listing_json for field in listing_fields + address_fields):
+    if not all(field in listing_json for field in listing_fields + address_fields) and not user_id:
         return jsonify({'error': 'Missing required fields'}), 400
+
+    for field in int_fields:
+        listing_json[field] = int(listing_json[field])
 
     listing_data = {field: listing_json[field] for field in listing_fields}
     address_data = {field: listing_json[field] for field in address_fields}
 
     try:
-        listing = Listing(**listing_data)
+        listing = Listing(**listing_data, user_id=user_id)
         db.session.add(listing)
 
         db.session.flush()
