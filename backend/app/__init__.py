@@ -7,6 +7,7 @@ from app.extensions import db, bcrypt
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
+from app.rbac_utilities import create_roles
 
 load_dotenv()
 
@@ -25,8 +26,11 @@ def create_app():
     db.init_app(app)
     app.config['SESSION_SQLALCHEMY'] = db
     bcrypt.init_app(app)
-    migrate = Migrate(app, db)
-    server_session = Session(app)
+    Migrate(app, db)
+    Session(app)
+
+    with app.app_context():
+        create_roles()
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
     app.register_blueprint(listing_bp, url_prefix='/api/listings')
