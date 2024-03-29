@@ -22,3 +22,17 @@ def create_new_connection(username, password):
     Session = sessionmaker(bind=engine)
 
     return Session
+
+
+def create_roles():
+    roles_sql = [text(f"CREATE ROLE IF NOT EXISTS 'user'@'localhost';"),
+                 text(f"CREATE ROLE IF NOT EXISTS 'admin'@'localhost';")]
+
+    grants_sql = [
+        text(f"GRANT ALL PRIVILEGES ON project.* TO 'admin'@'localhost';")]
+
+    with db.engine.connect() as connection:
+        for sql_statement in roles_sql + grants_sql:
+            connection.execute(sql_statement)
+
+        connection.execute(text("FLUSH PRIVILEGES;"))
