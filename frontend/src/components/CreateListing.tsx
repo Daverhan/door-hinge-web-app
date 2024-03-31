@@ -4,8 +4,15 @@ import { useNavigate } from "react-router-dom";
 function CreateListing() {
   const formRef = useRef<HTMLFormElement>(null);
   const [emptyInputFlag, setEmptyInputFlag] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
 
   const navigate = useNavigate();
+
+  const handleFileUploads = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFiles([...e.target.files]);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     if (!formRef.current) {
@@ -15,6 +22,10 @@ function CreateListing() {
     e.preventDefault();
 
     const formData = new FormData(formRef.current);
+
+    files.forEach((file) => {
+      formData.append("images", file);
+    });
 
     const formValues = {
       name: formData.get("name"),
@@ -65,44 +76,44 @@ function CreateListing() {
         onSubmit={handleSubmit}
         className="flex flex-col items-center ml-2"
       >
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="name" className="mr-2">
+        <div className="mb-1 px-4 md:px-16 grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="name" className="text-end mr-2">
             Name:
           </label>
           <input id="name" name="name" autoComplete="name"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="desc" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="desc" className="text-end mr-2">
             Description:
           </label>
           <textarea id="desc" name="desc" autoComplete="desc"></textarea>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="price" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="price" className="text-end mr-2">
             Price:
           </label>
           <input id="price" name="price" autoComplete="price"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="sqft" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="sqft" className="text-end mr-2">
             SqFt:
           </label>
           <input id="sqft" name="sqft" autoComplete="sqft"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="beds" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="beds" className="text-end mr-2">
             Beds:
           </label>
           <input id="beds" name="beds" autoComplete="beds"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="baths" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="baths" className="text-end mr-2">
             Baths:
           </label>
           <input id="baths" name="baths" autoComplete="baths"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="house-num" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="house-num" className="text-end mr-2">
             House #:
           </label>
           <input
@@ -111,29 +122,39 @@ function CreateListing() {
             autoComplete="house-num"
           ></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="street" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="street" className="text-end mr-2">
             Street:
           </label>
           <input id="street" name="street" autoComplete="street"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="city" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="city" className="text-end mr-2">
             City:
           </label>
           <input id="city" name="city" autoComplete="city"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="state" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="state" className="text-end mr-2">
             State:
           </label>
           <input id="state" name="state" autoComplete="state"></input>
         </div>
-        <div className="mb-1 grid grid-cols-[30%_70%]">
-          <label htmlFor="zip-code" className="mr-2">
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="zip-code" className="text-end mr-2">
             Zip Code:
           </label>
           <input id="zip-code" name="zip-code" autoComplete="zip-code"></input>
+        </div>
+        <div className="mb-1 px-4 md:px-16 grid grid-cols-[25%_50%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label className="text-end mr-2 mt-0.5">Images: </label>
+          <input
+            onChange={handleFileUploads}
+            id="file-uploads"
+            name="file-uploads"
+            type="file"
+            multiple
+          ></input>
         </div>
         <div className="flex justify-center mr-2">
           <button className="mt-2 justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-44">
