@@ -3,7 +3,6 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request, session, current_app
 from app.models.user import Listing, Address, User, Image
 from app.extensions import db
-from werkzeug.utils import secure_filename
 import random
 import os
 import uuid
