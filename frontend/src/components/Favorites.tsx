@@ -1,13 +1,6 @@
 //import { useNavigate } from 'react-router-dom';
 import React, {useEffect} from 'react';
 import Navbar from './Navbar';
-import Home_4 from "../assets/4.jpg";
-import Home_5 from "../assets/5.jpg";
-import Home_6 from "../assets/6.jpg";
-import Home_7 from "../assets/7.jpg";
-import Home_8 from "../assets/8.jpg"; 
-import Home_9 from "../assets/9.jpg";
-//import React from 'react'
 
 // defining types for favorites
 interface FavoriteProperty {
@@ -27,7 +20,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Pineapple',
     location: '124 Conch Street',
     price: '100',
-    imageUrl: Home_4,
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 3,
     bathrooms: 2,
   },
@@ -36,7 +29,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Squidward',
     location: '122 Conch Street',
     price: '200',
-    imageUrl: Home_5,
+    imageUrl: '',
     bedrooms: 4,
     bathrooms: 3,
   },
@@ -45,7 +38,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Patrick',
     location: '120 Conch Street',
     price: '300',
-    imageUrl: Home_6,
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 5,
     bathrooms: 4,
   },
@@ -54,7 +47,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Krusty Krab',
     location: '831 Bottomfeeder Lane',
     price: '400',
-    imageUrl: Home_7,
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 6,
     bathrooms: 5,
   },
@@ -63,7 +56,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Strawberry',
     location: '1 Berry Bitty Lane',
     price: '500',
-    imageUrl: Home_8,
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 1,
     bathrooms: 5,
   },
@@ -72,7 +65,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Chum Bucket',
     location: '1 Chum Bucket Lane',
     price: '600',
-    imageUrl: Home_9,
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 2,
     bathrooms: 5,
   },
