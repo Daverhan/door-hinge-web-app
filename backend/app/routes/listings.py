@@ -1,9 +1,23 @@
-from flask import Blueprint, jsonify, request, session
-from app.models.user import Listing, Address, User
+import uuid
+from datetime import datetime
+from flask import Blueprint, jsonify, request, session, current_app
+from app.models.user import Listing, Address, User, Image
 from app.extensions import db
+from werkzeug.utils import secure_filename
 import random
+import os
+import uuid
 
 listing_bp = Blueprint('listing', __name__)
+
+
+def generate_unique_filename(original_filename):
+    ext = os.path.splitext(original_filename)[1]
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    random_uuid = uuid.uuid4().hex
+    new_filename = f"{timestamp}_{random_uuid}{ext}"
+
+    return new_filename
 
 
 @listing_bp.route('next-listing', methods=['GET'])
@@ -54,23 +68,38 @@ def get_listing(listing_id):
 
 @listing_bp.route('', methods=['POST'])
 def create_listing():
-    listing_json = request.get_json()
+    upload_folder = current_app.config['UPLOAD_FOLDER']
 
-    listing_fields = ['name', 'desc',
-                      'price', 'num_beds', 'num_baths', 'sqft']
-    address_fields = ['house_num', 'street_name', 'city', 'state', 'zip_code']
-    int_fields = ['price', 'num_beds', 'num_baths',
-                  'sqft', 'house_num', 'zip_code']
+    listing_str_fields = ['name', 'desc',]
+    listing_num_fields = ['price', 'num_beds', 'num_baths', 'sqft']
+    listing_fields = listing_str_fields + listing_num_fields
+
+    address_str_fields = ['street_name', 'city', 'state']
+    address_num_fields = ['house_num', 'zip_code']
+    address_fields = address_str_fields + address_num_fields
+
     user_id = session.get('user_id')
 
-    if not all(field in listing_json for field in listing_fields + address_fields) and not user_id:
+    if not all(request.form.get(field) for field in listing_fields + address_fields) and not user_id:
         return jsonify({'error': 'Missing required fields'}), 400
 
-    for field in int_fields:
-        listing_json[field] = int(listing_json[field])
+    images = request.files.getlist('images')
 
-    listing_data = {field: listing_json[field] for field in listing_fields}
-    address_data = {field: listing_json[field] for field in address_fields}
+    listing_str_data = {field: request.form.get(field)
+                        for field in listing_str_fields}
+    address_str_data = {field: request.form.get(field)
+                        for field in address_str_fields}
+
+    try:
+        listing_num_data = {field: int(
+            request.form.get(field)) for field in listing_num_fields}
+        address_num_data = {field: int(
+            request.form.get(field)) for field in address_num_fields}
+    except ValueError:
+        return jsonify({'error': 'One or more fields expected an integer'}), 400
+
+    listing_data = {**listing_str_data, **listing_num_data}
+    address_data = {**address_str_data, **address_num_data}
 
     try:
         listing = Listing(**listing_data, user_id=user_id)
@@ -80,6 +109,16 @@ def create_listing():
 
         address = Address(**address_data, listing_id=listing.id)
         db.session.add(address)
+
+        for image_file in images:
+            if image_file:
+                filename = generate_unique_filename(image_file.filename)
+                file_path_os = os.path.join(upload_folder, filename)
+                file_path_table = "images/" + filename
+                image = Image(listing_id=listing.id,
+                              name=filename, path=file_path_table)
+                db.session.add(image)
+                image_file.save(file_path_os)
 
         db.session.commit()
 

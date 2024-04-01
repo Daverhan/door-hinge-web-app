@@ -28,13 +28,13 @@ function CreateListing() {
       desc: formData.get("desc"),
       price: formData.get("price"),
       sqft: formData.get("sqft"),
-      num_beds: formData.get("beds"),
-      num_baths: formData.get("baths"),
-      house_num: formData.get("house-num"),
-      street_name: formData.get("street"),
+      num_beds: formData.get("num_beds"),
+      num_baths: formData.get("num_baths"),
+      house_num: formData.get("house_num"),
+      street_name: formData.get("street_name"),
       city: formData.get("city"),
       state: formData.get("state"),
-      zip_code: formData.get("zip-code"),
+      zip_code: formData.get("zip_code"),
     };
 
     let emptyInputFields = Object.values(formValues).some((value) => !value);
@@ -98,32 +98,40 @@ function CreateListing() {
           <input id="sqft" name="sqft" autoComplete="sqft"></input>
         </div>
         <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
-          <label htmlFor="beds" className="text-end mr-2">
+          <label htmlFor="num_beds" className="text-end mr-2">
             Beds:
           </label>
-          <input id="beds" name="beds" autoComplete="beds"></input>
+          <input id="num_beds" name="num_beds" autoComplete="num_beds"></input>
         </div>
         <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
-          <label htmlFor="baths" className="text-end mr-2">
+          <label htmlFor="num_baths" className="text-end mr-2">
             Baths:
           </label>
-          <input id="baths" name="baths" autoComplete="baths"></input>
-        </div>
-        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
-          <label htmlFor="house-num" className="text-end mr-2">
-            House #:
-          </label>
           <input
-            id="house-num"
-            name="house-num"
-            autoComplete="house-num"
+            id="num_baths"
+            name="num_baths"
+            autoComplete="num_baths"
           ></input>
         </div>
         <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
-          <label htmlFor="street" className="text-end mr-2">
+          <label htmlFor="house_num" className="text-end mr-2">
+            House #:
+          </label>
+          <input
+            id="house_num"
+            name="house_num"
+            autoComplete="house_num"
+          ></input>
+        </div>
+        <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
+          <label htmlFor="street_name" className="text-end mr-2">
             Street:
           </label>
-          <input id="street" name="street" autoComplete="street"></input>
+          <input
+            id="street_name"
+            name="street_name"
+            autoComplete="street_name"
+          ></input>
         </div>
         <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
           <label htmlFor="city" className="text-end mr-2">
@@ -138,10 +146,10 @@ function CreateListing() {
           <input id="state" name="state" autoComplete="state"></input>
         </div>
         <div className="mb-1 px-4 md:px-16  grid grid-cols-[25%_75%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
-          <label htmlFor="zip-code" className="text-end mr-2">
+          <label htmlFor="zip_code" className="text-end mr-2">
             Zip Code:
           </label>
-          <input id="zip-code" name="zip-code" autoComplete="zip-code"></input>
+          <input id="zip_code" name="zip_code" autoComplete="zip_code"></input>
         </div>
         <div className="mb-1 px-4 md:px-16 grid grid-cols-[25%_50%] md:grid-cols-[25%_70%] lg:grid-cols-[25%_50%] w-full">
           <label className="text-end mr-2 mt-0.5">Images: </label>
