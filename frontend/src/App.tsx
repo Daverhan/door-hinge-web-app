@@ -5,6 +5,7 @@ import MakeAccount from "./components/MakeAccount";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
+import CreateListing from "./components/CreateListing";
 import Favorites from "./components/Favorites";
 
 function App() {
@@ -31,6 +32,15 @@ function App() {
               <>
                 <Navbar />
                 <Profile />
+              </>
+            }
+          />
+          <Route
+            path="/create-listing"
+            element={
+              <>
+                <Navbar />
+                <CreateListing />
               </>
             }
           />
