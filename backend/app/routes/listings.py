@@ -6,11 +6,6 @@ import random
 listing_bp = Blueprint('listing', __name__)
 
 
-@listing_bp.route('<int:listing_id>/images', methods=['POST'])
-def upload_image(listing_id):
-    pass
-
-
 @listing_bp.route('next-listing', methods=['GET'])
 def get_next_listing():
     user_id = session.get('user_id')
