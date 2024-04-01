@@ -23,10 +23,6 @@ function CreateListing() {
 
     const formData = new FormData(formRef.current);
 
-    files.forEach((file) => {
-      formData.append("images", file);
-    });
-
     const formValues = {
       name: formData.get("name"),
       desc: formData.get("desc"),
@@ -48,13 +44,14 @@ function CreateListing() {
       return;
     }
 
+    files.forEach((file) => {
+      formData.append("images", file);
+    });
+
     const createListing = async () => {
       const response = await fetch("/api/listings", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formValues),
+        body: formData,
       });
 
       if (!response.ok) {
