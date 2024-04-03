@@ -48,7 +48,7 @@ class Address(db.Model):
     house_num = db.Column(db.Integer, nullable=False)
     street_name = db.Column(db.String(200), nullable=False)
     city = db.Column(db.String(50), nullable=False)
-    state = db.Column(db.String(10), nullable=False)
+    state = db.Column(db.String(50), nullable=False)
     zip_code = db.Column(db.Integer, nullable=False)
     listing_id = db.Column(db.Integer, db.ForeignKey(
         'listing.id'), nullable=False)

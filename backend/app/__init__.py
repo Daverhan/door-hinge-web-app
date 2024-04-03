@@ -17,6 +17,8 @@ def create_app():
 
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URI')
+    app.config['UPLOAD_FOLDER'] = os.path.join(
+        app.root_path, 'static', 'images')
     app.config['SESSION_TYPE'] = 'sqlalchemy'
     app.config['SESSION_SQLALCHEMY_TABLE'] = 'flask_sessions'
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
