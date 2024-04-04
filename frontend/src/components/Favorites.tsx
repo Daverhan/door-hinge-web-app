@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import Navbar from './Navbar';
 import Modal from './Modal';
+//import { Carousel } from "@material-tailwind/react";
+import Pineapple_House from '../assets/pineapple.jpg';
 
 // defining types for favorites
 interface FavoriteProperty {
@@ -20,7 +22,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Pineapple',
     location: '124 Conch Street',
     price: '100',
-    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
+    imageUrl: Pineapple_House,
     bedrooms: 3,
     bathrooms: 2,
   },
@@ -29,7 +31,7 @@ const test_favorite: FavoriteProperty[] = [
     title: 'Squidward',
     location: '122 Conch Street',
     price: '200',
-    imageUrl: '',
+    imageUrl: 'https://images.unsplash.com/photo-1612830723420-4b3b3e3b3b3b',
     bedrooms: 4,
     bathrooms: 3,
   },
@@ -75,6 +77,7 @@ function Favorites() {
     const [favorites, setFavorites] = React.useState<FavoriteProperty[]>([]);
     const [selectedProperty, setSelectedProperty] = React.useState<FavoriteProperty | null>(null);
     const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
+    //const [carouselKey, setCarouselKey] = React.useState(0);
     
     const openModal = (property: FavoriteProperty) => {
       console.log('Opening modal for property:', property);
