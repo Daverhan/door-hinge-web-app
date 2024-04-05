@@ -8,11 +8,17 @@ user_chat_association = db.Table('user_chat',
                                  db.Column('chat_id', db.Integer, db.ForeignKey(
                                      'chat.id'), primary_key=True))
 
-user_listing_association = db.Table('user_listing',
-                                    db.Column('user_id', db.Integer, db.ForeignKey(
-                                        'user.id'), primary_key=True),
-                                    db.Column('listing_id', db.Integer, db.ForeignKey(
-                                        'listing.id'), primary_key=True))
+user_favorited_listing_association = db.Table('user_favorited_listing',
+                                              db.Column('user_id', db.Integer, db.ForeignKey(
+                                                  'user.id'), primary_key=True),
+                                              db.Column('listing_id', db.Integer, db.ForeignKey(
+                                                  'listing.id'), primary_key=True))
+
+user_passed_listing_association = db.Table('user_passed_listing',
+                                           db.Column('user_id', db.Integer, db.ForeignKey(
+                                               'user.id'), primary_key=True),
+                                           db.Column('listing_id', db.Integer, db.ForeignKey(
+                                               'listing.id'), primary_key=True))
 
 
 class User(db.Model):
@@ -24,8 +30,10 @@ class User(db.Model):
     password = db.Column(db.String(100), nullable=False)
     chats = db.relationship('Chat', secondary=user_chat_association,
                             backref=db.backref('users', lazy='dynamic'))
-    favorited_listings = db.relationship('Listing', secondary=user_listing_association,
-                                         backref=db.backref('users', lazy='dynamic'))
+    favorited_listings = db.relationship('Listing', secondary=user_favorited_listing_association,
+                                         backref=db.backref('favorited_by_users', lazy='dynamic'))
+    passed_listings = db.relationship(
+        'Listing', secondary=user_passed_listing_association, backref=db.backref('passed_by_users', lazy='dynamic'))
     sent_messages = db.relationship('Message', backref='sender')
     listings = db.relationship('Listing', backref='user')
 
@@ -39,6 +47,7 @@ class User(db.Model):
             'password': self.password,
             'listings': [listing.to_dict() for listing in self.listings],
             'favorited_listings': [listing.to_dict() for listing in self.favorited_listings],
+            'passed_listings': [listing.to_dict() for listing in self.passed_listings],
             'chats': [chat.to_dict() for chat in self.chats]
         }
 
