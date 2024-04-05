@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, session, make_response
-from app.models.user import User, Listing, Chat, Message, user_chat_association, user_listing_association
+from app.models.user import User, Listing, Chat, Message, user_chat_association, user_favorited_listing_association, user_passed_listing_association
 from app.extensions import db, bcrypt
 from app.rbac_utilities import create_mysql_user
 
@@ -269,7 +269,7 @@ def favorite_a_listing_for_user():
 
     new_association = {'user_id': user_id, 'listing_id': listing_id}
     db.session.execute(
-        user_listing_association.insert().values(new_association))
+        user_favorited_listing_association.insert().values(new_association))
     db.session.commit()
 
     return jsonify({'message': 'Listing successfully favorited for the user'}), 201
@@ -287,17 +287,46 @@ def unfavorite_a_listing_from_user(user_id, listing_id):
         return jsonify({'error': 'Listing not found'}), 404
 
     association_exists = db.session.query(db.exists().where(
-        (user_listing_association.c.user_id == user_id) &
-        (user_listing_association.c.listing_id == listing_id)
+        (user_favorited_listing_association.c.user_id == user_id) &
+        (user_favorited_listing_association.c.listing_id == listing_id)
     )).scalar()
 
     if not association_exists:
         return jsonify({'error': 'Cannot unfavorite the specified listing from the user as it was not favorited'}), 404
 
-    db.session.execute(user_listing_association.delete().where(
-        (user_listing_association.c.user_id == user_id) &
-        (user_listing_association.c.listing_id == listing_id)
+    db.session.execute(user_favorited_listing_association.delete().where(
+        (user_favorited_listing_association.c.user_id == user_id) &
+        (user_favorited_listing_association.c.listing_id == listing_id)
     ))
     db.session.commit()
 
     return jsonify({'message': 'Listing successfully unfavorited from the user'}), 200
+
+
+@user_bp.route('passed-listings', methods=['POST'])
+def pass_a_listing_for_user():
+    user_id = session.get('user_id')
+
+    user = User.query.get(user_id)
+
+    listing_id_json = request.get_json()
+
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+
+    if 'listing_id' not in listing_id_json:
+        return jsonify({'error': 'Missing listing id'}), 404
+
+    listing_id = listing_id_json['listing_id']
+
+    listing = Listing.query.get(listing_id)
+
+    if not listing:
+        return jsonify({'error': 'Listing not found'}), 404
+
+    new_association = {'user_id': user_id, 'listing_id': listing_id}
+    db.session.execute(
+        user_passed_listing_association.insert().values(new_association))
+    db.session.commit()
+
+    return jsonify({'message': 'Listing successfully passed for the user'}), 201
