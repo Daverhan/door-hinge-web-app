@@ -24,6 +24,9 @@ function Profile() {
           Name: {data.first_name} {data.last_name}
         </p>
         <p>ID: {data.id}</p>
+        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
+          Account Settings
+        </button>
       </div>
     </section>
   );
