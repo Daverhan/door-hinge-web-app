@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import Navbar from './Navbar';
 import Modal from './Modal';
 //import { Carousel } from "@material-tailwind/react";
-import Pineapple_House from '../assets/pineapple.jpg';
 
 // defining types for favorites
 interface FavoriteProperty {
@@ -16,7 +15,7 @@ interface FavoriteProperty {
 }
 
 // testing out the favorites page
-const test_favorite: FavoriteProperty[] = [
+/*const test_favorite: FavoriteProperty[] = [
   {
     id: 1,
     title: 'Pineapple',
@@ -71,7 +70,7 @@ const test_favorite: FavoriteProperty[] = [
     bedrooms: 2,
     bathrooms: 5,
   },
-];
+];*/
 
 function Favorites() {
     const [favorites, setFavorites] = React.useState<FavoriteProperty[]>([]);
@@ -91,8 +90,12 @@ function Favorites() {
     };
 
     useEffect(() => {
-      setFavorites(test_favorite);
-
+      //setFavorites(test_favorite);
+      fetch("/api/users/favorite-listings")
+        .then((res) => res.json())
+        .then((listings) => {
+          setFavorites(listings);
+        })
     }, []);
 
       return(
@@ -136,6 +139,5 @@ function Favorites() {
           </Modal>
           )}
         </div>
-
 )};
 export default Favorites;

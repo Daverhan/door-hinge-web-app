@@ -44,6 +44,15 @@ function App() {
               </>
             }
           />
+          <Route
+            path="/favorites"
+            element={
+              <>
+                <Navbar />
+                <Favorites />
+              </>
+            }
+          />
         </Routes>
       </main>
     </Router>
