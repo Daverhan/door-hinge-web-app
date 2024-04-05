@@ -145,13 +145,17 @@ function EditProfile() {
                                 Input fields cannot be empty
                             </p>
                         ) : null}
-                        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+                        <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
                             onClick={navigateTo("/ResetPassword")}>
                             Reset Password
                         </button>
                         <div className="py-1"></div>
                         <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
                             Save Changes
+                        </button>
+                        <div className="py-1"></div>
+                        <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full">
+                            Delete Account
                         </button>
                         <div className="py-1"></div>
                     </form>
