@@ -285,7 +285,7 @@ def get_favorite_a_listing_for_user():
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    favorite_listings = Listing.query.join(user_listing_association).filter(user_listing_association=user_id).all()
+    favorite_listings = (Listing.query.join(user_favorited_listing_association).filter(user_favorited_listing_association.c.user_id==user_id).all())
 
     favorites_data = []
     for listing in favorite_listings:
