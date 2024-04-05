@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Carousel } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
 
 interface Address {
   id: number;
@@ -39,11 +40,20 @@ function Home() {
   const [lister, setLister] = useState<User | null>(null);
   const [carouselKey, setCarouselKey] = useState(0);
 
+  const navigate = useNavigate();
+
   const getNextListing = async () => {
     const listing_response = await fetch("/api/listings/next-listing");
 
+    let listing_data_json = await listing_response.json();
+
+    if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
+      navigate("/favorites");
+      return;
+    }
+
     if (listing_response.ok) {
-      const listing = (await listing_response.json()) as Listing;
+      const listing = listing_data_json as Listing;
       setListing(listing);
 
       const lister_response = await fetch(`/api/users/${listing?.user_id}`);

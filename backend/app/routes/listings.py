@@ -38,7 +38,7 @@ def get_next_listing():
         Listing.user_id != user_id, Listing.id.notin_(filtered_listings_ids)).all()
 
     if not listings:
-        return jsonify({'error': 'No available listings to show'}), 400
+        return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_LISTINGS'}), 200
 
     listings_data = [listing.to_dict() for listing in listings]
 
