@@ -154,7 +154,8 @@ function EditProfile() {
                             Save Changes
                         </button>
                         <div className="py-1"></div>
-                        <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full">
+                        <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
+                            onClick={navigateTo("/Goodbye")}>
                             Delete Account
                         </button>
                         <div className="py-1"></div>
