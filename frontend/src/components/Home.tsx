@@ -74,7 +74,21 @@ function Home() {
   };
 
   const passListing = async () => {
-    getNextListing();
+    const request_content = {
+      listing_id: listing?.id,
+    };
+
+    const response = await fetch(`/api/users/passed-listings`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request_content),
+    });
+
+    if (response.ok) {
+      getNextListing();
+    }
   };
 
   useEffect(() => {

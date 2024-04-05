@@ -31,11 +31,11 @@ def get_next_listing():
     if not user:
         return jsonify({'error', 'User not found'}), 404
 
-    favorited_listings_ids = [
-        listing.id for listing in user.favorited_listings]
+    filtered_listings_ids = [
+        listing.id for listing in user.favorited_listings + user.passed_listings]
 
     listings = Listing.query.filter(
-        Listing.user_id != user_id, Listing.id.notin_(favorited_listings_ids)).all()
+        Listing.user_id != user_id, Listing.id.notin_(filtered_listings_ids)).all()
 
     if not listings:
         return jsonify({'error': 'No available listings to show'}), 400
