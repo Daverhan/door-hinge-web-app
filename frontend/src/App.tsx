@@ -8,6 +8,7 @@ import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
 import Favorites from "./components/Favorites";
 import EditProfile from "./components/EditProfile";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/makeaccount" element={<MakeAccount />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/EditProfile" element={<EditProfile />} />
+          <Route path="/ResetPassword" element={<ResetPassword />} />
           <Route
             path="/home"
             element={

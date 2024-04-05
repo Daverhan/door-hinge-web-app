@@ -8,6 +8,10 @@ function EditProfile() {
 
     const navigate = useNavigate();
 
+    const navigateTo = (path: string) => () => {
+        navigate(path);
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (!formRef.current) {
             return;
@@ -21,9 +25,7 @@ function EditProfile() {
         const formValues = {
             first_name: formData.get("first-name"),
             last_name: formData.get("last-name"),
-            email: formData.get("email"),
             username: formData.get("username"),
-            password: formData.get("password"),
         };
 
         Object.values(formValues).forEach((value) => {
@@ -41,33 +43,32 @@ function EditProfile() {
         }
 
         fetch("/api/users", {
-            method: "POST",
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formValues),
         }).then((response) => {
             if (response.status === 409) {
                 setError409Flag(true);
             } else {
-                navigate("/home");
+                navigate("/profile");
             }
         });
-
-        const [data, setData] = useState({
-            first_name: "",
-            last_name: "",
-            username: "",
-            id: "",
-        });
-
-        useEffect(() => {
-            fetch("/api/users/profile")
-                .then((res) => res.json())
-                .then((jsonData) => {
-                    setData(jsonData);
-                });
-        }, []);
-
     };
+
+    const [data, setData] = useState({
+        first_name: "",
+        last_name: "",
+        username: "",
+        id: "",
+    });
+
+    useEffect(() => {
+        fetch("/api/users/profile")
+            .then((res) => res.json())
+            .then((jsonData) => {
+                setData(jsonData);
+            });
+    }, []);
 
     return (
         <section className="bg-blue-100 h-screen pt-16">
@@ -100,6 +101,7 @@ function EditProfile() {
                                     id="first-name"
                                     name="first-name"
                                     autoComplete="first-name"
+                                    defaultValue={data.first_name}
                                 ></input>
                             </div>
                             <div className="w-full px-3">
@@ -113,21 +115,7 @@ function EditProfile() {
                                     className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
                                     id="last-name"
                                     name="last-name"
-                                ></input>
-                            </div>
-                            <div className="w-full px-3">
-                                <label
-                                    htmlFor="email"
-                                    className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
-                                >
-                                    Email
-                                </label>
-                                <input
-                                    className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    autoComplete="email"
+                                    defaultValue={data.last_name}
                                 ></input>
                             </div>
                             <div className="w-full px-3">
@@ -143,12 +131,13 @@ function EditProfile() {
                                     type="username"
                                     name="username"
                                     autoComplete="username"
+                                    defaultValue={data.username}
                                 ></input>
                             </div>
                         </div>
                         {error409Flag ? (
                             <p className="text-2xl text-center mb-2 text-red-500">
-                                A user already exists with the provided username or email
+                                A user already exists with the provided username
                             </p>
                         ) : null}
                         {emptyInputFlag ? (
@@ -156,6 +145,11 @@ function EditProfile() {
                                 Input fields cannot be empty
                             </p>
                         ) : null}
+                        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+                            onClick={navigateTo("/ResetPassword")}>
+                            Reset Password
+                        </button>
+                        <div className="py-1"></div>
                         <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
                             Save Changes
                         </button>
