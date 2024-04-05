@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
 import Favorites from "./components/Favorites";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/makeaccount" element={<MakeAccount />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/EditProfile" element={<EditProfile />} />
           <Route
             path="/home"
             element={

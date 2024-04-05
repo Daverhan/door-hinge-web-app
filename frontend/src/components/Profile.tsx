@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  const navigate = useNavigate();
+
+  const navigateTo = (path: string) => () => {
+    navigate(path);
+  };
+
   const [data, setData] = useState({
     first_name: "",
     last_name: "",
@@ -24,7 +31,8 @@ function Profile() {
           Name: {data.first_name} {data.last_name}
         </p>
         <p>ID: {data.id}</p>
-        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
+        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+          onClick={navigateTo("/EditProfile")}>
           Account Settings
         </button>
       </div>
