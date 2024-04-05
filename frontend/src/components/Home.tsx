@@ -125,7 +125,7 @@ function Home() {
                 {listing?.images.map((image) => (
                   <img
                     key={image.id}
-                    src={"http://localhost:5000" + image.path}
+                    src={import.meta.env.VITE_API_TARGET + image.path}
                     alt={`image ${image.id}`}
                     className="object-cover h-full w-full"
                   />
