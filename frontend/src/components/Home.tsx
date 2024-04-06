@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import { Carousel } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,10 +36,39 @@ interface User {
   last_name: string;
 }
 
+const socket = io("http://127.0.0.1::5001")
+
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [lister, setLister] = useState<User | null>(null);
   const [carouselKey, setCarouselKey] = useState(0);
+  const [username, setUsername] = useState("");
+  const [currentMessage, setCurrentMessage] = useState("");
+  const [messages, setMessages] = useState<Array<{ username: string; message: string }>>([]);
+
+  // Connect to WebSocket server
+  useEffect(() => {
+      socket.on('connect', () => {
+          console.log('Connected to WebSocket server');
+      });
+
+      // Listening for messages from the server
+      socket.on('receive_message', (data) => {
+          setMessages((prevMessages) => [...prevMessages, data]);
+      });
+
+      return () => {
+          socket.off('connect');
+          socket.off('receive_message');
+      };
+  }, []);
+
+  const handleSendMessage = () => {
+      if (!currentMessage.trim()) return;
+      // Send message to the server
+      socket.emit('send_message', { username, message: currentMessage });
+      setCurrentMessage("");
+  };
 
   const navigate = useNavigate();
 
@@ -168,6 +198,16 @@ function Home() {
           <p className="break-words mx-4">
             This section can be used to directly message the lister
           </p>
+          <div className="chat-setup">
+            <input
+              type="text"
+              placeholder="Enter username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="border-2 border-gray-300 p-2 my-2"
+            />
+            {/* Placeholder for future chat UI */}
+          </div>
         </div>
       </div>
     </section>
