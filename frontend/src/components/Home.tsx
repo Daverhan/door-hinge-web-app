@@ -63,6 +63,13 @@ function Home() {
       };
   }, []);
 
+  const handleUsernameKeyDown = (event) => {
+  if (event.key === 'Enter' && tempUsername.trim() !== '') {
+      setUsername(tempUsername); // Set the username only when Enter is pressed
+      setTempUsername(""); // Clear temporary username
+    }
+  };
+
   const handleSendMessage = () => {
       if (!currentMessage.trim()) return;
       // Send message to the server
@@ -198,16 +205,38 @@ function Home() {
           <p className="break-words mx-4">
             This section can be used to directly message the lister
           </p>
-          <div className="chat-setup">
+          <div className="chat-section p-4">
+        {!username ? (
+          <>
             <input
               type="text"
-              placeholder="Enter username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter username to chat..."
+              value={tempUsername}
+              onChange={(e) => setTempUsername(e.target.value)}
+              onKeyDown={handleUsernameKeyDown} // Handle Enter press
               className="border-2 border-gray-300 p-2 my-2"
             />
-            {/* Placeholder for future chat UI */}
-          </div>
+          </>
+        ) : (
+          <>
+            <div className="messages overflow-y-auto h-64">
+              {messages.map((msg, index) => (
+                <p key={index}><b>{msg.username}:</b> {msg.message}</p>
+              ))}
+            </div>
+            <input
+              type="text"
+              placeholder="Type a message..."
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              className="border p-2 mr-2"
+            />
+            <button onClick={handleSendMessage} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Send
+            </button>
+          </>
+        )}
+      </div>
         </div>
       </div>
     </section>

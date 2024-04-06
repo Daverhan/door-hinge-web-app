@@ -4,15 +4,14 @@ from flask_session import Session
 from flask_socketio import SocketIO
 from app.routes.users import user_bp
 from app.routes.listings import listing_bp
-from app.extensions import db, bcrypt
+from app.extensions import db, bcrypt, socketio
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
 from app.rbac_utilities import create_roles
+from .routes import chat
 
 load_dotenv()
-
-socketio = SocketIO()
 
 def create_app():
     app = Flask(__name__)
@@ -34,6 +33,7 @@ def create_app():
     Session(app)
 
     socketio.init_app(app, manage_session=False)
+
 
     with app.app_context():
         db.create_all()
