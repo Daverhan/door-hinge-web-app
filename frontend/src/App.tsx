@@ -6,7 +6,7 @@ import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
-import Messaging from "./components/Messaging";
+import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
 
 function App() {
@@ -41,7 +41,7 @@ function App() {
             element={
               <>
                 <Navbar />
-                <Messaging />
+                <Messages />
               </>
             }
           />
