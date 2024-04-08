@@ -6,6 +6,7 @@ import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
+import Messaging from "./components/Messaging";
 
 function App() {
   return (
@@ -34,6 +35,17 @@ function App() {
               </>
             }
           />
+
+          <Route
+            path="/messages"
+            element={
+              <>
+                <Navbar />
+                <Messaging />
+              </>
+            }
+          />
+
           <Route
             path="/create-listing"
             element={
