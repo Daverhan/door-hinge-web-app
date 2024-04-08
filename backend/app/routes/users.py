@@ -352,6 +352,7 @@ def favorite_a_listing_for_user():
 
     return jsonify({'message': 'Listing successfully favorited for the user'}), 201
 
+
 @user_bp.route('favorite-listings', methods=['GET'])
 def get_favorite_a_listing_for_user():
     user_id = session.get('user_id')
@@ -359,17 +360,19 @@ def get_favorite_a_listing_for_user():
     if not user_id:
         return jsonify({'error': 'User not logged in'}), 401
 
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
 
-    favorite_listings = (Listing.query.join(user_favorited_listing_association).filter(user_favorited_listing_association.c.user_id==user_id).all())
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-    favorites_data = []
-    for listing in favorite_listings:
-        favorites_data.append(listing.to_dict())
-        
+        favorite_listings = (user_db_session.query(Listing).join(user_favorited_listing_association).filter(
+            user_favorited_listing_association.c.user_id == user_id).all())
+
+        favorites_data = [listing.to_dict() for listing in favorite_listings]
+
     return jsonify(favorites_data), 200
+
 
 '''
 IMPORTANT:
