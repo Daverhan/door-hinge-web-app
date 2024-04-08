@@ -289,12 +289,8 @@ def get_favorite_a_listing_for_user():
 
     favorites_data = []
     for listing in favorite_listings:
-        listing_data = {
-            'id': listing.id,
-            'title': listing.name,
-        }
-        favorites_data.append(listing_data)
-
+        favorites_data.append(listing.to_dict())
+        
     return jsonify(favorites_data), 200
 
 @user_bp.route('<int:user_id>/favorite-listings/<int:listing_id>', methods=['DELETE'])
