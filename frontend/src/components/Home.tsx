@@ -49,7 +49,7 @@ function Home() {
 
     if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
       alert(
-        "There are currently no more available listings to fetch. Meanwhile, check out your favorited listings!"
+        "There are currently no more available listings to fetch. Meanwhile, check out your favorite listings!"
       );
       navigate("/favorites");
       return;
