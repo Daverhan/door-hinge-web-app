@@ -353,6 +353,27 @@ def favorite_a_listing_for_user():
     return jsonify({'message': 'Listing successfully favorited for the user'}), 201
 
 
+@user_bp.route('favorite-listings', methods=['GET'])
+def get_favorite_a_listing_for_user():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return jsonify({'error': 'User not logged in'}), 401
+
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        favorite_listings = (user_db_session.query(Listing).join(user_favorited_listing_association).filter(
+            user_favorited_listing_association.c.user_id == user_id).all())
+
+        favorites_data = [listing.to_dict() for listing in favorite_listings]
+
+    return jsonify(favorites_data), 200
+
+
 '''
 IMPORTANT:
 THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:

@@ -48,6 +48,9 @@ function Home() {
     let listing_data_json = await listing_response.json();
 
     if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
+      alert(
+        "There are currently no more available listings to fetch. Meanwhile, check out your favorited listings!"
+      );
       navigate("/favorites");
       return;
     }
