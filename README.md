@@ -8,7 +8,7 @@
 #### Backend Installation
 - To install all the requirements, run `pip install -r requirements.txt` whilst within the backend directory.
 #### Frontend Installation
-- Install npm via `npm install` whilst within the frontend directory.
+- Install necessary npm packages via `npm install` whilst within the frontend directory.
 
 ### To Launch:
 
