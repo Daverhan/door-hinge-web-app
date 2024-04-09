@@ -36,7 +36,6 @@ def create_app():
 
 
     with app.app_context():
-        db.create_all()
         create_roles()
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
