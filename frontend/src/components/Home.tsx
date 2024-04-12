@@ -38,6 +38,7 @@ interface User {
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [lister, setLister] = useState<User | null>(null);
+  const [noListingsAlert, setNoListingsAlert] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
 
   const navigate = useNavigate();
@@ -48,10 +49,7 @@ function Home() {
     let listing_data_json = await listing_response.json();
 
     if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
-      alert(
-        "There are currently no more available listings to fetch. Meanwhile, check out your favorite listings!"
-      );
-      navigate("/favorites");
+      setNoListingsAlert(true);
       return;
     }
 
@@ -110,6 +108,37 @@ function Home() {
 
   return (
     <section className="h-screen pt-16">
+      {noListingsAlert ? (
+        <div className="absolute w-full z-10">
+          <div
+            id="alert-border-1"
+            className="flex items-center p-4 mb-4 text-blue-800 border-t-4 border-blue-300 bg-blue-50 dark:text-blue-400 dark:bg-gray-800 dark:border-blue-800"
+            role="alert"
+          >
+            <svg
+              className="flex-shrink-0 w-4 h-4"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+            </svg>
+            <div className="ms-3 text-md lg:text-lg font-medium">
+              No more available listings. Meanwhile, check out your favorited
+              listings{" "}
+              <button
+                onClick={() => {
+                  navigate("/favorites");
+                }}
+                className="font-semibold underline hover:no-underline"
+              >
+                here.
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
         <div className="hidden lg:flex h-full w-full justify-center items-center bg-blue-100">
           <p className="break-words mx-4">
