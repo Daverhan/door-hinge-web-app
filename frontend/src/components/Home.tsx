@@ -39,12 +39,30 @@ function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
   const [lister, setLister] = useState<User | null>(null);
   const [noListingsAlert, setNoListingsAlert] = useState(false);
+  const [invalidFiltersAlert, setInvalidFiltersAlert] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
+  const [filterFields, setFilterFields] = useState({
+    min_price: 0,
+    max_price: 0,
+    min_sqft: 0,
+    max_sqft: 0,
+    min_beds: 0,
+    max_beds: 0,
+    min_baths: 0,
+    max_baths: 0,
+  });
 
   const navigate = useNavigate();
 
   const getNextListing = async () => {
-    const listing_response = await fetch("/api/listings/next-listing");
+    const filter_settings_content = { ...filterFields };
+    const listing_response = await fetch("/api/listings/next-listing", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(filter_settings_content),
+    });
 
     let listing_data_json = await listing_response.json();
 
@@ -140,10 +158,112 @@ function Home() {
         </div>
       ) : null}
       <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
-        <div className="hidden lg:flex h-full w-full justify-center items-center bg-blue-100">
-          <p className="break-words mx-4">
-            This section can be used to filter for properties
-          </p>
+        <div className="hidden lg:flex lg:flex-col gap-12 h-full w-full p-3 bg-blue-100 items-center">
+          <p className="text-center text-2xl">Filter Properties</p>
+          <div className="grid grid-cols-[15%_85%]">
+            <label className="text-end">Price: </label>
+            <div className="flex">
+              <input
+                value={filterFields.min_price}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    min_price: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="ml-1 w-24"
+              ></input>
+              <p className="mx-2">TO</p>
+              <input
+                value={filterFields.max_price}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    max_price: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="w-24"
+              ></input>
+            </div>
+          </div>
+          <div className="grid grid-cols-[15%_85%]">
+            <label className="text-end">SQFT: </label>
+            <div className="flex">
+              <input
+                value={filterFields.min_sqft}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    min_sqft: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="ml-1 w-24"
+              ></input>
+              <p className="mx-2">TO</p>
+              <input
+                value={filterFields.max_sqft}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    max_sqft: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="w-24"
+              ></input>
+            </div>
+          </div>
+          <div className="grid grid-cols-[15%_85%]">
+            <label className="text-end">Beds: </label>
+            <div className="flex">
+              <input
+                value={filterFields.min_beds}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    min_beds: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="ml-1 w-24"
+              ></input>
+              <p className="mx-2">TO</p>
+              <input
+                value={filterFields.max_beds}
+                onChange={(e) =>
+                  setFilterFields({
+                    ...filterFields,
+                    max_beds: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-24"
+              ></input>
+            </div>
+          </div>
+          <div className="grid grid-cols-[15%_85%]">
+            <label className="text-end">Baths: </label>
+            <div className="flex">
+              <input
+                value={filterFields.min_baths}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    min_baths: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="ml-1 w-24"
+              ></input>
+              <p className="mx-2">TO</p>
+              <input
+                value={filterFields.max_baths}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    max_baths: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="w-24"
+              ></input>
+            </div>
+          </div>
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>

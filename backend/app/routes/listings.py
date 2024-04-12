@@ -20,9 +20,16 @@ def generate_unique_filename(original_filename):
     return new_filename
 
 
-@listing_bp.route('next-listing', methods=['GET'])
+@listing_bp.route('next-listing', methods=['POST'])
 def get_next_listing():
     user_id = session.get('user_id')
+    request_json = request.get_json()
+
+    filter_fields = ['min_price', 'max_price', 'min_sqft',
+                     'max_sqft', 'min_beds', 'max_beds', 'min_baths', 'max_baths']
+
+    filter_settings = {field: request_json[field]
+                       for field in request_json if field in filter_fields}
 
     if not user_id:
         return jsonify({'error': 'No user attached to the request'}), 400
