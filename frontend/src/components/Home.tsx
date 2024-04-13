@@ -40,7 +40,6 @@ function Home() {
   const [lister, setLister] = useState<User | null>(null);
   const [noListingsAlert, setNoListingsAlert] = useState(false);
   const [invalidFiltersAlert, setInvalidFiltersAlert] = useState(false);
-  const [noFilteredListings, setNoFilteredListings] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
   const [filterFields, setFilterFields] = useState({
     min_price: 0,
@@ -55,7 +54,7 @@ function Home() {
 
   const navigate = useNavigate();
 
-  const checkForInvalidFilterFields = () => {
+  const getNextListing = async () => {
     if (
       filterFields.min_price > filterFields.max_price ||
       filterFields.min_sqft > filterFields.max_sqft ||
@@ -63,13 +62,12 @@ function Home() {
       filterFields.min_baths > filterFields.max_baths
     ) {
       setInvalidFiltersAlert(true);
+      setListing(null);
+      setLister(null);
+      return;
     } else {
-      if (!noFilteredListings) setInvalidFiltersAlert(false);
+      setInvalidFiltersAlert(false);
     }
-  };
-
-  const getNextListing = async () => {
-    checkForInvalidFilterFields();
 
     const filterFieldsToSend = {};
 
@@ -111,16 +109,18 @@ function Home() {
 
     if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
       setNoListingsAlert(true);
+      setListing(null);
+      setLister(null);
       return;
     }
 
     if (listing_data_json.code === "NO_AVAILABLE_FILTERED_LISTINGS") {
       setInvalidFiltersAlert(true);
-      setNoFilteredListings(true);
+      setListing(null);
+      setLister(null);
       return;
     }
 
-    setNoFilteredListings(false);
     setInvalidFiltersAlert(false);
 
     if (listing_response.ok) {
@@ -137,10 +137,6 @@ function Home() {
   };
 
   const favoriteListing = async () => {
-    checkForInvalidFilterFields();
-
-    if (invalidFiltersAlert || noFilteredListings) return;
-
     const request_content = {
       listing_id: listing?.id,
     };
@@ -159,10 +155,6 @@ function Home() {
   };
 
   const passListing = async () => {
-    checkForInvalidFilterFields();
-
-    if (invalidFiltersAlert || noFilteredListings) return;
-
     const request_content = {
       listing_id: listing?.id,
     };
@@ -187,7 +179,7 @@ function Home() {
   return (
     <section className="h-screen pt-16">
       {noListingsAlert ? (
-        <div className="absolute w-full z-10">
+        <div className="absolute w-full">
           <div
             id="alert-border-1"
             className="flex items-center p-4 mb-4 text-blue-800 border-t-4 border-blue-300 bg-blue-50 dark:text-blue-400 dark:bg-gray-800 dark:border-blue-800"
@@ -218,7 +210,7 @@ function Home() {
         </div>
       ) : null}
       {invalidFiltersAlert ? (
-        <div className="absolute w-full z-10">
+        <div className="absolute w-full">
           <div
             className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
             role="alert"
