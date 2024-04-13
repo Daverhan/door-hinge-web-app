@@ -38,7 +38,7 @@ def get_next_listing():
         user = user_db_session.query(User).get(user_id)
 
         if not user:
-            return jsonify({'error', 'User not found'}), 404
+            return jsonify({'error': 'User not found'}), 404
 
         filtered_listings_ids = [
             listing.id for listing in user.favorited_listings + user.passed_listings]
@@ -49,7 +49,27 @@ def get_next_listing():
         if not listings:
             return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_LISTINGS'}), 200
 
-        listings_data = [listing.to_dict() for listing in listings]
+        filtered_listings = []
+
+        for listing in listings:
+            include = True
+
+            if 'min_price' in filter_settings and 'max_price' in filter_settings:
+                include &= filter_settings['min_price'] <= listing.price <= filter_settings['max_price']
+            if 'min_sqft' in filter_settings and 'max_sqft' in filter_settings:
+                include &= filter_settings['min_sqft'] <= listing.sqft <= filter_settings['max_sqft']
+            if 'min_beds' in filter_settings and 'max_beds' in filter_settings:
+                include &= filter_settings['min_beds'] <= listing.num_beds <= filter_settings['max_beds']
+            if 'min_baths' in filter_settings and 'max_baths' in filter_settings:
+                include &= filter_settings['min_baths'] <= listing.num_baths <= filter_settings['max_baths']
+
+            if include:
+                filtered_listings.append(listing)
+
+        if not filtered_listings:
+            return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_FILTERED_LISTINGS'}), 200
+
+        listings_data = [listing.to_dict() for listing in filtered_listings]
 
         random_listing = listings_data[random.randint(
             0, len(listings_data) - 1)]

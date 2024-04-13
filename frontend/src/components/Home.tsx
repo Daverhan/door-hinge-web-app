@@ -40,6 +40,7 @@ function Home() {
   const [lister, setLister] = useState<User | null>(null);
   const [noListingsAlert, setNoListingsAlert] = useState(false);
   const [invalidFiltersAlert, setInvalidFiltersAlert] = useState(false);
+  const [noFilteredListings, setNoFilteredListings] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
   const [filterFields, setFilterFields] = useState({
     min_price: 0,
@@ -54,8 +55,50 @@ function Home() {
 
   const navigate = useNavigate();
 
+  const checkForInvalidFilterFields = () => {
+    if (
+      filterFields.min_price > filterFields.max_price ||
+      filterFields.min_sqft > filterFields.max_sqft ||
+      filterFields.min_beds > filterFields.max_beds ||
+      filterFields.min_baths > filterFields.max_baths
+    ) {
+      setInvalidFiltersAlert(true);
+    } else {
+      if (!noFilteredListings) setInvalidFiltersAlert(false);
+    }
+  };
+
   const getNextListing = async () => {
-    const filter_settings_content = { ...filterFields };
+    checkForInvalidFilterFields();
+
+    const filterFieldsToSend = {};
+
+    if (filterFields.max_price != 0) {
+      Object.assign(filterFieldsToSend, {
+        min_price: filterFields.min_price,
+        max_price: filterFields.max_price,
+      });
+    }
+    if (filterFields.max_sqft != 0) {
+      Object.assign(filterFieldsToSend, {
+        min_sqft: filterFields.min_sqft,
+        max_sqft: filterFields.max_sqft,
+      });
+    }
+    if (filterFields.max_beds != 0) {
+      Object.assign(filterFieldsToSend, {
+        min_beds: filterFields.min_beds,
+        max_beds: filterFields.max_beds,
+      });
+    }
+    if (filterFields.max_baths != 0) {
+      Object.assign(filterFieldsToSend, {
+        min_baths: filterFields.min_baths,
+        max_baths: filterFields.max_baths,
+      });
+    }
+
+    const filter_settings_content = { ...filterFieldsToSend };
     const listing_response = await fetch("/api/listings/next-listing", {
       method: "POST",
       headers: {
@@ -71,6 +114,15 @@ function Home() {
       return;
     }
 
+    if (listing_data_json.code === "NO_AVAILABLE_FILTERED_LISTINGS") {
+      setInvalidFiltersAlert(true);
+      setNoFilteredListings(true);
+      return;
+    }
+
+    setNoFilteredListings(false);
+    setInvalidFiltersAlert(false);
+
     if (listing_response.ok) {
       const listing = listing_data_json as Listing;
       setListing(listing);
@@ -85,6 +137,10 @@ function Home() {
   };
 
   const favoriteListing = async () => {
+    checkForInvalidFilterFields();
+
+    if (invalidFiltersAlert || noFilteredListings) return;
+
     const request_content = {
       listing_id: listing?.id,
     };
@@ -103,6 +159,10 @@ function Home() {
   };
 
   const passListing = async () => {
+    checkForInvalidFilterFields();
+
+    if (invalidFiltersAlert || noFilteredListings) return;
+
     const request_content = {
       listing_id: listing?.id,
     };
@@ -154,6 +214,21 @@ function Home() {
                 here.
               </button>
             </div>
+          </div>
+        </div>
+      ) : null}
+      {invalidFiltersAlert ? (
+        <div className="absolute w-full z-10">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+            role="alert"
+          >
+            <strong className="font-bold">Invalid Filter Settings. </strong>
+            <span className="block sm:inline">
+              Either no listings matched the criteria entered or the minimum
+              value is higher than the maximum value (unless the maximum is 0,
+              denoting no filter).
+            </span>
           </div>
         </div>
       ) : null}
@@ -264,6 +339,12 @@ function Home() {
               ></input>
             </div>
           </div>
+          <button
+            onClick={getNextListing}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
+          >
+            Apply
+          </button>
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>
