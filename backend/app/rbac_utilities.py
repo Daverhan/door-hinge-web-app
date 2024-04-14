@@ -25,20 +25,15 @@ def create_roles():
                  text(f"CREATE ROLE IF NOT EXISTS 'moderator'@'localhost';"),
                  text(f"CREATE ROLE IF NOT EXISTS 'admin'@'localhost';")]
 
-    # TO-DO: Add required grant statements for user and moderator roles
     grants_sql = [
         text(f"GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;"),
-        text(f"GRANT SELECT ON project.user TO 'user'@'localhost';"),
-        text(f"GRANT SELECT ON project.listing TO 'user'@'localhost';"),
-        text(f"GRANT INSERT ON project.user_favorited_listing TO 'user'@'localhost';"),
-        text(f"GRANT INSERT ON project.user_passed_listing TO 'user'@'localhost';"),
-        text(f"GRANT SELECT ON project.user_favorited_listing TO 'user'@'localhost';"),
-        text(f"GRANT SELECT ON project.user_passed_listing TO 'user'@'localhost';"),
-        text(f"GRANT SELECT ON project.address TO 'user'@'localhost';"),
-        text(f"GRANT SELECT ON project.image TO 'user'@'localhost';"),
-        text(f"GRANT INSERT ON project.listing to 'user'@'localhost';"),
-        text(f"GRANT INSERT ON project.address TO 'user'@'localhost';"),
-        text(f"GRANT INSERT ON project.image TO 'user'@'localhost';")]
+        text(f"GRANT 'user'@'localhost' TO 'moderator'@'localhost';"),
+        text(f"GRANT SELECT, UPDATE, DELETE ON project.user TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.listing TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT, DELETE ON project.user_favorited_listing TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT ON project.user_passed_listing TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.address TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.image TO 'user'@'localhost';")]
 
     with db.engine.connect() as connection:
         for sql_statement in roles_sql + grants_sql:
