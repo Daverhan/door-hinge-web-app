@@ -50,6 +50,7 @@ function Home() {
     max_beds: 0,
     min_baths: 0,
     max_baths: 0,
+    zip_code: 0,
   });
 
   const navigate = useNavigate();
@@ -93,6 +94,11 @@ function Home() {
       Object.assign(filterFieldsToSend, {
         min_baths: filterFields.min_baths,
         max_baths: filterFields.max_baths,
+      });
+    }
+    if (filterFields.zip_code != 0) {
+      Object.assign(filterFieldsToSend, {
+        zip_code: filterFields.zip_code,
       });
     }
 
@@ -225,9 +231,9 @@ function Home() {
         </div>
       ) : null}
       <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
-        <div className="hidden lg:flex lg:flex-col gap-12 h-full w-full p-3 bg-blue-100 items-center">
+        <div className="hidden lg:flex lg:flex-col gap-8 h-full w-full p-3 bg-blue-100 items-center">
           <p className="text-center text-2xl">Filter Properties</p>
-          <div className="grid grid-cols-[15%_85%]">
+          <div className="grid grid-cols-[30%_70%] mr-14 xl:mr-20 gap-y-12">
             <label className="text-end">Price: </label>
             <div className="flex">
               <input
@@ -252,8 +258,6 @@ function Home() {
                 className="w-24"
               ></input>
             </div>
-          </div>
-          <div className="grid grid-cols-[15%_85%]">
             <label className="text-end">SQFT: </label>
             <div className="flex">
               <input
@@ -278,8 +282,6 @@ function Home() {
                 className="w-24"
               ></input>
             </div>
-          </div>
-          <div className="grid grid-cols-[15%_85%]">
             <label className="text-end">Beds: </label>
             <div className="flex">
               <input
@@ -304,8 +306,6 @@ function Home() {
                 className="w-24"
               ></input>
             </div>
-          </div>
-          <div className="grid grid-cols-[15%_85%]">
             <label className="text-end">Baths: </label>
             <div className="flex">
               <input
@@ -328,6 +328,19 @@ function Home() {
                   });
                 }}
                 className="w-24"
+              ></input>
+            </div>
+            <label className="text-end">Zip Code: </label>
+            <div>
+              <input
+                value={filterFields.zip_code}
+                onChange={(e) => {
+                  setFilterFields({
+                    ...filterFields,
+                    zip_code: parseInt(e.target.value) || 0,
+                  });
+                }}
+                className="ml-1 w-24"
               ></input>
             </div>
           </div>

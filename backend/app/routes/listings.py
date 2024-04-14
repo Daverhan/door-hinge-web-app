@@ -26,7 +26,7 @@ def get_next_listing():
     request_json = request.get_json()
 
     filter_fields = ['min_price', 'max_price', 'min_sqft',
-                     'max_sqft', 'min_beds', 'max_beds', 'min_baths', 'max_baths']
+                     'max_sqft', 'min_beds', 'max_beds', 'min_baths', 'max_baths', 'zip_code']
 
     filter_settings = {field: request_json[field]
                        for field in request_json if field in filter_fields}
@@ -62,6 +62,8 @@ def get_next_listing():
                 include &= filter_settings['min_beds'] <= listing.num_beds <= filter_settings['max_beds']
             if 'min_baths' in filter_settings and 'max_baths' in filter_settings:
                 include &= filter_settings['min_baths'] <= listing.num_baths <= filter_settings['max_baths']
+            if 'zip_code' in filter_settings:
+                include &= filter_settings['zip_code'] == listing.addresses[0].zip_code
 
             if include:
                 filtered_listings.append(listing)
