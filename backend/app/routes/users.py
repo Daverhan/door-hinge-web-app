@@ -1,7 +1,10 @@
-from flask import Blueprint, jsonify, request, session, make_response
-from app.models.user import User, Listing, Chat, Message, user_chat_association, user_favorited_listing_association, user_passed_listing_association
-from app.extensions import db, bcrypt
 from app.rbac_utilities import create_mysql_user, safe_db_connection
+from app.extensions import db, bcrypt
+from flask import Blueprint, jsonify, request, session, make_response
+from app.models.user import (User, Listing, Chat, Message, user_chat_association,
+                             user_favorited_listing_association, user_passed_listing_association,
+                             MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH,
+                             MAX_USERNAME_LENGTH)
 
 user_bp = Blueprint('user', __name__)
 
@@ -96,6 +99,11 @@ def register_user():
 
         if user_exists:
             return jsonify({'error': 'A user already exists with the provided username or email'}), 409
+
+        if (len(user_json['first_name']) > MAX_FIRST_NAME_LENGTH or len(user_json['last_name']) >
+                MAX_LAST_NAME_LENGTH or len(user_json['email']) > MAX_EMAIL_LENGTH or len(user_json['username']) >
+                MAX_USERNAME_LENGTH or len(user_json['password']) > MAX_PASSWORD_LENGTH):
+            return jsonify({'error': 'One or more input fields are over the maximum character limit', 'code': 'MAX_INPUT_LIMIT'}), 400
 
         user_json['password'] = bcrypt.generate_password_hash(
             user_json['password'])
