@@ -1,39 +1,7 @@
 import { useEffect, useState } from "react";
 import { Carousel } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
-
-interface Address {
-  id: number;
-  listing_id: number;
-  house_num: number;
-  street_name: string;
-  city: string;
-  state: string;
-  zip_code: number;
-}
-
-interface Image {
-  id: number;
-  path: string;
-}
-
-interface Listing {
-  id: number;
-  user_id: number;
-  name: string;
-  desc: string;
-  price: number;
-  num_beds: number;
-  num_baths: number;
-  sqft: number;
-  addresses: Address[];
-  images: Image[];
-}
-
-interface User {
-  first_name: string;
-  last_name: string;
-}
+import { User, Listing, FilterFields } from "../interfaces";
 
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
@@ -41,7 +9,7 @@ function Home() {
   const [noListingsAlert, setNoListingsAlert] = useState(false);
   const [invalidFiltersAlert, setInvalidFiltersAlert] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
-  const [filterFields, setFilterFields] = useState({
+  const [filterFields, setFilterFields] = useState<FilterFields>({
     min_price: 0,
     max_price: 0,
     min_sqft: 0,
@@ -55,7 +23,11 @@ function Home() {
 
   const navigate = useNavigate();
 
-  const getNextListing = async () => {
+  const getNextListing = async (e?: React.FormEvent<HTMLFormElement>) => {
+    if (e) {
+      e.preventDefault();
+    }
+
     if (
       filterFields.min_price > filterFields.max_price ||
       filterFields.min_sqft > filterFields.max_sqft ||
@@ -233,123 +205,146 @@ function Home() {
       <div className="flex flex-col lg:grid lg:grid-cols-[32%_36%_32%] 3xl:grid-cols-[1fr_691px_1fr] h-screen-adjusted">
         <div className="hidden lg:flex lg:flex-col gap-8 h-full w-full p-3 bg-blue-100 items-center">
           <p className="text-center text-2xl">Filter Properties</p>
-          <div className="grid grid-cols-[30%_70%] mr-14 xl:mr-20 gap-y-12">
-            <label className="text-end">Price: </label>
-            <div className="flex">
-              <input
-                value={filterFields.min_price}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    min_price: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="ml-1 w-24"
-              ></input>
-              <p className="mx-2">TO</p>
-              <input
-                value={filterFields.max_price}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    max_price: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="w-24"
-              ></input>
+          <form onSubmit={getNextListing}>
+            <div className="grid grid-cols-[30%_70%] mr-14 xl:mr-20 gap-y-12">
+              <label className="text-end">Price: </label>
+              <div className="flex">
+                <input
+                  value={filterFields.min_price}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      min_price: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="ml-1 w-24"
+                ></input>
+                <p className="mx-2">TO</p>
+                <input
+                  value={filterFields.max_price}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      max_price: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="w-24"
+                ></input>
+              </div>
+              <label className="text-end">SQFT: </label>
+              <div className="flex">
+                <input
+                  value={filterFields.min_sqft}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      min_sqft: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="ml-1 w-24"
+                ></input>
+                <p className="mx-2">TO</p>
+                <input
+                  value={filterFields.max_sqft}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      max_sqft: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="w-24"
+                ></input>
+              </div>
+              <label className="text-end">Beds: </label>
+              <div className="flex">
+                <input
+                  value={filterFields.min_beds}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      min_beds: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="ml-1 w-24"
+                ></input>
+                <p className="mx-2">TO</p>
+                <input
+                  value={filterFields.max_beds}
+                  onChange={(e) =>
+                    setFilterFields({
+                      ...filterFields,
+                      max_beds: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-24"
+                ></input>
+              </div>
+              <label className="text-end">Baths: </label>
+              <div className="flex">
+                <input
+                  value={filterFields.min_baths}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      min_baths: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="ml-1 w-24"
+                ></input>
+                <p className="mx-2">TO</p>
+                <input
+                  value={filterFields.max_baths}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      max_baths: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="w-24"
+                ></input>
+              </div>
+              <label className="text-end">Zip Code: </label>
+              <div>
+                <input
+                  value={filterFields.zip_code}
+                  onChange={(e) => {
+                    setFilterFields({
+                      ...filterFields,
+                      zip_code: parseInt(e.target.value) || 0,
+                    });
+                  }}
+                  className="ml-1 w-24"
+                ></input>
+              </div>
             </div>
-            <label className="text-end">SQFT: </label>
-            <div className="flex">
-              <input
-                value={filterFields.min_sqft}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    min_sqft: parseInt(e.target.value) || 0,
-                  });
+            <div className="flex justify-center xl:gap-4 mt-10">
+              <button
+                onClick={() => {
+                  getNextListing();
                 }}
-                className="ml-1 w-24"
-              ></input>
-              <p className="mx-2">TO</p>
-              <input
-                value={filterFields.max_sqft}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    max_sqft: parseInt(e.target.value) || 0,
-                  });
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const resetFields = Object.keys(filterFields).reduce(
+                    (acc: FilterFields, key) => {
+                      acc[key as keyof FilterFields] = 0;
+                      return acc;
+                    },
+                    {} as FilterFields
+                  );
+
+                  setFilterFields(resetFields);
                 }}
-                className="w-24"
-              ></input>
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
+              >
+                Reset
+              </button>
             </div>
-            <label className="text-end">Beds: </label>
-            <div className="flex">
-              <input
-                value={filterFields.min_beds}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    min_beds: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="ml-1 w-24"
-              ></input>
-              <p className="mx-2">TO</p>
-              <input
-                value={filterFields.max_beds}
-                onChange={(e) =>
-                  setFilterFields({
-                    ...filterFields,
-                    max_beds: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-24"
-              ></input>
-            </div>
-            <label className="text-end">Baths: </label>
-            <div className="flex">
-              <input
-                value={filterFields.min_baths}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    min_baths: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="ml-1 w-24"
-              ></input>
-              <p className="mx-2">TO</p>
-              <input
-                value={filterFields.max_baths}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    max_baths: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="w-24"
-              ></input>
-            </div>
-            <label className="text-end">Zip Code: </label>
-            <div>
-              <input
-                value={filterFields.zip_code}
-                onChange={(e) => {
-                  setFilterFields({
-                    ...filterFields,
-                    zip_code: parseInt(e.target.value) || 0,
-                  });
-                }}
-                className="ml-1 w-24"
-              ></input>
-            </div>
-          </div>
-          <button
-            onClick={getNextListing}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
-          >
-            Apply
-          </button>
+          </form>
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
           <div>
