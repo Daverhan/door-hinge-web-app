@@ -76,7 +76,7 @@ def get_next_listing():
         random_listing = listings_data[random.randint(
             0, len(listings_data) - 1)]
 
-    return jsonify(random_listing)
+    return jsonify(random_listing), 200
 
 
 '''
@@ -170,7 +170,7 @@ def create_listing():
 
             user_db_session.commit()
 
-            return jsonify({"message": "Listing created successfully", **listing.to_dict()})
+            return jsonify({"message": "Listing created successfully"}), 200
         except Exception as e:
             user_db_session.rollback()
             return jsonify({'error': str(e)}), 500
