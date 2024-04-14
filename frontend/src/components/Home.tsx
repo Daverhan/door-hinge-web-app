@@ -1,51 +1,7 @@
 import { useEffect, useState } from "react";
 import { Carousel } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
-
-interface Address {
-  id: number;
-  listing_id: number;
-  house_num: number;
-  street_name: string;
-  city: string;
-  state: string;
-  zip_code: number;
-}
-
-interface Image {
-  id: number;
-  path: string;
-}
-
-interface Listing {
-  id: number;
-  user_id: number;
-  name: string;
-  desc: string;
-  price: number;
-  num_beds: number;
-  num_baths: number;
-  sqft: number;
-  addresses: Address[];
-  images: Image[];
-}
-
-interface User {
-  first_name: string;
-  last_name: string;
-}
-
-interface FilterFields {
-  min_price: number;
-  max_price: number;
-  min_sqft: number;
-  max_sqft: number;
-  min_beds: number;
-  max_beds: number;
-  min_baths: number;
-  max_baths: number;
-  zip_code: number;
-}
+import { User, Listing, FilterFields } from "../interfaces";
 
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
