@@ -20,9 +20,16 @@ def generate_unique_filename(original_filename):
     return new_filename
 
 
-@listing_bp.route('next-listing', methods=['GET'])
+@listing_bp.route('next-listing', methods=['POST'])
 def get_next_listing():
     user_id = session.get('user_id')
+    request_json = request.get_json()
+
+    filter_fields = ['min_price', 'max_price', 'min_sqft',
+                     'max_sqft', 'min_beds', 'max_beds', 'min_baths', 'max_baths', 'zip_code']
+
+    filter_settings = {field: request_json[field]
+                       for field in request_json if field in filter_fields}
 
     if not user_id:
         return jsonify({'error': 'No user attached to the request'}), 400
@@ -31,7 +38,7 @@ def get_next_listing():
         user = user_db_session.query(User).get(user_id)
 
         if not user:
-            return jsonify({'error', 'User not found'}), 404
+            return jsonify({'error': 'User not found'}), 404
 
         filtered_listings_ids = [
             listing.id for listing in user.favorited_listings + user.passed_listings]
@@ -42,12 +49,34 @@ def get_next_listing():
         if not listings:
             return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_LISTINGS'}), 200
 
-        listings_data = [listing.to_dict() for listing in listings]
+        filtered_listings = []
+
+        for listing in listings:
+            include = True
+
+            if 'min_price' in filter_settings and 'max_price' in filter_settings:
+                include &= filter_settings['min_price'] <= listing.price <= filter_settings['max_price']
+            if 'min_sqft' in filter_settings and 'max_sqft' in filter_settings:
+                include &= filter_settings['min_sqft'] <= listing.sqft <= filter_settings['max_sqft']
+            if 'min_beds' in filter_settings and 'max_beds' in filter_settings:
+                include &= filter_settings['min_beds'] <= listing.num_beds <= filter_settings['max_beds']
+            if 'min_baths' in filter_settings and 'max_baths' in filter_settings:
+                include &= filter_settings['min_baths'] <= listing.num_baths <= filter_settings['max_baths']
+            if 'zip_code' in filter_settings:
+                include &= filter_settings['zip_code'] == listing.addresses[0].zip_code
+
+            if include:
+                filtered_listings.append(listing)
+
+        if not filtered_listings:
+            return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_FILTERED_LISTINGS'}), 200
+
+        listings_data = [listing.to_dict() for listing in filtered_listings]
 
         random_listing = listings_data[random.randint(
             0, len(listings_data) - 1)]
 
-    return jsonify(random_listing)
+    return jsonify(random_listing), 200
 
 
 '''
@@ -141,7 +170,7 @@ def create_listing():
 
             user_db_session.commit()
 
-            return jsonify({"message": "Listing created successfully", **listing.to_dict()})
+            return jsonify({"message": "Listing created successfully"}), 200
         except Exception as e:
             user_db_session.rollback()
             return jsonify({'error': str(e)}), 500

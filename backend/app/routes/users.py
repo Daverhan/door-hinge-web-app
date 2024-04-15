@@ -1,7 +1,10 @@
-from flask import Blueprint, jsonify, request, session, make_response
-from app.models.user import User, Listing, Chat, Message, user_chat_association, user_favorited_listing_association, user_passed_listing_association
-from app.extensions import db, bcrypt
 from app.rbac_utilities import create_mysql_user, safe_db_connection
+from app.extensions import db, bcrypt
+from flask import Blueprint, jsonify, request, session, make_response
+from app.models.user import (User, Listing, Chat, Message, user_chat_association,
+                             user_favorited_listing_association, user_passed_listing_association,
+                             MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH,
+                             MAX_USERNAME_LENGTH)
 
 user_bp = Blueprint('user', __name__)
 
@@ -35,22 +38,15 @@ def get_users():
     return jsonify(users_data)
 
 
-'''
-IMPORTANT:
-THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
-- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
-- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
-'''
-
-
 @user_bp.route('<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.query.get(user_id)
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
 
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
 
-    return jsonify(user.to_dict()), 200
+        return jsonify({"first_name": user.first_name, "last_name": user.last_name}), 200
 
 
 @user_bp.route('logout', methods=['POST'])
@@ -80,7 +76,7 @@ def login_user():
     session['username'] = user.username
     session['password'] = user.password
 
-    return jsonify({'message': 'Successfully logged in', 'id': user.id, 'username': user.username}), 200
+    return jsonify({'message': 'Successfully logged in'}), 200
 
 
 @user_bp.route('', methods=['POST'])
@@ -96,6 +92,11 @@ def register_user():
 
         if user_exists:
             return jsonify({'error': 'A user already exists with the provided username or email'}), 409
+
+        if (len(user_json['first_name']) > MAX_FIRST_NAME_LENGTH or len(user_json['last_name']) >
+                MAX_LAST_NAME_LENGTH or len(user_json['email']) > MAX_EMAIL_LENGTH or len(user_json['username']) >
+                MAX_USERNAME_LENGTH or len(user_json['password']) > MAX_PASSWORD_LENGTH):
+            return jsonify({'error': 'One or more input fields are over the maximum character limit', 'code': 'MAX_INPUT_LIMIT'}), 400
 
         user_json['password'] = bcrypt.generate_password_hash(
             user_json['password'])
@@ -113,7 +114,7 @@ def register_user():
         session['username'] = user.username
         session['password'] = user.password
 
-        return jsonify({'message': 'User created successfully', **user.to_dict()}), 200
+        return jsonify({'message': 'User created successfully'}), 200
 
     return jsonify({'error': 'Missing required fields'}), 400
 
