@@ -196,7 +196,7 @@ function Home() {
             <strong className="font-bold">Invalid Filter Settings. </strong>
             <span className="block sm:inline">
               Either no listings matched the criteria entered or the minimum
-              value is higher than the maximum value (unless the maximum is 0,
+              value is higher than the maximum value (unless both are 0,
               denoting no filter).
             </span>
           </div>
