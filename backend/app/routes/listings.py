@@ -6,7 +6,7 @@ from app.extensions import db
 import random
 import os
 import uuid
-from app.rbac_utilities import safe_db_connection
+from app.rbac_utilities import safe_db_connection, is_user_authorized
 
 listing_bp = Blueprint('listing', __name__)
 
@@ -22,6 +22,10 @@ def generate_unique_filename(original_filename):
 
 @listing_bp.route('next-listing', methods=['POST'])
 def get_next_listing():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     user_id = session.get('user_id')
     request_json = request.get_json()
 
@@ -31,14 +35,8 @@ def get_next_listing():
     filter_settings = {field: request_json[field]
                        for field in request_json if field in filter_fields}
 
-    if not user_id:
-        return jsonify({'error': 'No user attached to the request'}), 400
-
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).get(user_id)
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         filtered_listings_ids = [
             listing.id for listing in user.favorited_listings + user.passed_listings]
@@ -115,6 +113,10 @@ def get_listing(listing_id):
 
 @listing_bp.route('', methods=['POST'])
 def create_listing():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     upload_folder = current_app.config['UPLOAD_FOLDER']
 
     listing_str_fields = ['name', 'desc',]
