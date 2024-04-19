@@ -57,9 +57,6 @@ def get_user(user_id):
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).get(user_id)
 
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
         return jsonify({"first_name": user.first_name, "last_name": user.last_name}), 200
 
 
@@ -376,11 +373,6 @@ def get_favorite_a_listing_for_user():
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
-        user = user_db_session.query(User).get(user_id)
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
         favorite_listings = (user_db_session.query(Listing).join(user_favorited_listing_association).filter(
             user_favorited_listing_association.c.user_id == user_id).all())
 
@@ -434,12 +426,7 @@ def pass_a_listing_for_user():
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
-        user = user_db_session.query(User).get(user_id)
-
         listing_id_json = request.get_json()
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         if 'listing_id' not in listing_id_json:
             return jsonify({'error': 'Missing listing id'}), 404

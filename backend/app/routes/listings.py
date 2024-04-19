@@ -35,14 +35,8 @@ def get_next_listing():
     filter_settings = {field: request_json[field]
                        for field in request_json if field in filter_fields}
 
-    if not user_id:
-        return jsonify({'error': 'No user attached to the request'}), 400
-
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).get(user_id)
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         filtered_listings_ids = [
             listing.id for listing in user.favorited_listings + user.passed_listings]
