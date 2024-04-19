@@ -13,6 +13,7 @@ from .routes import chat
 
 load_dotenv()
 
+
 def create_app():
     app = Flask(__name__)
 
@@ -32,7 +33,7 @@ def create_app():
     Migrate(app, db)
     Session(app)
 
-    socketio.init_app(app, manage_session=False)
+    socketio.init_app(app, async_mode='threading', cors_allowed_origins=["http://localhost:5173"])
 
 
     with app.app_context():

@@ -235,13 +235,6 @@ def create_user_chat(user_id):
     if not user:
         return jsonify({'error': 'User not found'}), 404
 
-    chat = Chat()
-    db.session.add(chat)
-    db.session.commit()
-
-    new_association = {'user_id': user_id, 'chat_id': chat.id}
-    db.session.execute(user_chat_association.insert().values(new_association))
-    db.session.commit()
 
     return jsonify({'message': 'Chat created successfully', 'chat_id': chat.id, 'user_id': user.id}), 201
 
@@ -275,7 +268,7 @@ def delete_user_chat(user_id, chat_id):
 
     db.session.execute(user_chat_association.delete().where(
         (user_chat_association.c.user_id == user_id) &
-        (user_chat_association.c.chat_id == chat_id)
+            (user_chat_association.c.chat_id == chat_id)
     ))
     db.session.commit()
 
@@ -305,7 +298,7 @@ def create_message(user_id, chat_id):
 
     association_exists = db.session.query(db.exists().where(
         (user_chat_association.c.user_id == user_id) &
-        (user_chat_association.c.chat_id == chat_id)
+            (user_chat_association.c.chat_id == chat_id)
     )).scalar()
 
     if not association_exists:
@@ -344,6 +337,19 @@ def favorite_a_listing_for_user():
 
         if not listing:
             return jsonify({'error': 'Listing not found'}), 404
+
+
+        chat = Chat()
+        user_db_session.add(chat)
+        user_db_session.commit()
+
+        new_association = {'user_id': user_id, 'chat_id': chat.id}
+        user_db_session.execute(user_chat_association.insert().values(new_association))
+        user_db_session.commit()
+
+        new_association = {'user_id': listing.user_id, 'chat_id': chat.id}
+        user_db_session.execute(user_chat_association.insert().values(new_association))
+        user_db_session.commit()
 
         new_association = {'user_id': user_id, 'listing_id': listing_id}
         user_db_session.execute(

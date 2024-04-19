@@ -42,3 +42,10 @@ export interface FilterFields {
   max_baths: number;
   zip_code: number;
 }
+
+export interface Chat {
+  name: string;
+  first_name: string;
+  last_name: string;
+  chat_id: number;
+}
