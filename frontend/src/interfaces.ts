@@ -42,3 +42,8 @@ export interface FilterFields {
   max_baths: number;
   zip_code: number;
 }
+
+export interface AuthenticationContext {
+  isAuthenticated: boolean;
+  htmlContent: string;
+}

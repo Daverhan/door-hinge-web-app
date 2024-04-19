@@ -1,4 +1,4 @@
-from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized
+from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated
 from app.extensions import db, bcrypt
 from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
@@ -7,6 +7,15 @@ from app.models.user import (User, Listing, Chat, Message, user_chat_association
                              MAX_USERNAME_LENGTH)
 
 user_bp = Blueprint('user', __name__)
+
+
+@user_bp.route('check-auth')
+def check_user_auth():
+    authentication = is_user_authenticated()
+    if isinstance(authentication, tuple):
+        return authentication
+
+    return jsonify({'message:': 'Authenticated'})
 
 
 @user_bp.route('moderator', methods=['GET'])
