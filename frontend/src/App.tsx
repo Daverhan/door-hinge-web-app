@@ -8,6 +8,7 @@ import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
 import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
+import Moderator from "./components/Moderator";
 
 function App() {
   return (
@@ -61,6 +62,14 @@ function App() {
               <>
                 <Navbar />
                 <Favorites />
+              </>
+            }
+          />
+          <Route
+            path="/moderator"
+            element={
+              <>
+                <Moderator />
               </>
             }
           />
