@@ -9,72 +9,88 @@ import CreateListing from "./components/CreateListing";
 import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
 import Moderator from "./components/Moderator";
+import { AuthProvider } from "./components/auth/AuthProvider";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
     <Router>
-      <main>
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route
-            path="/home"
-            element={
-              <>
-                <Navbar />
-                <Home />
-              </>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <>
-                <Navbar />
-                <Profile />
-              </>
-            }
-          />
+      <AuthProvider>
+        <main>
+          <Routes>
+            <Route path="/" element={<Welcome />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/home"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Home />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Profile />
+                  </>
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/messages"
-            element={
-              <>
-                <Navbar />
-                <Messages />
-              </>
-            }
-          />
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Messages />
+                  </>
+                </ProtectedRoute>
+              }
+            />
 
-          <Route
-            path="/create-listing"
-            element={
-              <>
-                <Navbar />
-                <CreateListing />
-              </>
-            }
-          />
-          <Route
-            path="/favorites"
-            element={
-              <>
-                <Navbar />
-                <Favorites />
-              </>
-            }
-          />
-          <Route
-            path="/moderator"
-            element={
-              <>
-                <Moderator />
-              </>
-            }
-          />
-        </Routes>
-      </main>
+            <Route
+              path="/create-listing"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <CreateListing />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Navbar />
+                    <Favorites />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/moderator"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Moderator />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+      </AuthProvider>
     </Router>
   );
 }

@@ -62,10 +62,9 @@ def safe_db_connection(username, password):
 
 
 def is_user_authorized(required_role):
-    user_id = session.get('user_id')
-
-    if not user_id:
-        return render_template('unauthorized.html'), 401
+    authentication = is_user_authenticated()
+    if isinstance(authentication, tuple):
+        return authentication
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         grants = user_db_session.execute(text('SHOW GRANTS;')).fetchall()
@@ -75,3 +74,12 @@ def is_user_authorized(required_role):
                 return True
 
     return render_template('forbidden.html'), 403
+
+
+def is_user_authenticated():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return render_template('unauthorized.html'), 401
+
+    return True
