@@ -6,6 +6,7 @@ import React, {
   ReactNode,
 } from "react";
 import { AuthenticationContext } from "../../interfaces";
+import { useLocation } from "react-router-dom";
 
 const AuthContext = createContext<AuthenticationContext | null>(null);
 
@@ -16,8 +17,14 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [htmlContent, setHtmlContent] = useState<string>("");
+  const location = useLocation();
 
   useEffect(() => {
+    const skipAuthRoutes = ["/", "/login", "/signup"];
+    if (skipAuthRoutes.includes(location.pathname)) {
+      return;
+    }
+
     const checkAuth = async () => {
       const response = await fetch("/api/users/check-auth");
       if (!response.ok) {
@@ -30,7 +37,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [location.pathname]);
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, htmlContent }}>
