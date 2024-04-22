@@ -41,11 +41,21 @@ function Navbar() {
   };
 
   return (
-    <section className="grid grid-cols-[30%_40%_30%] h-16 bg-white fixed w-full top-0 z-10">
-      <div></div>
+    <section className="grid grid-cols-[30%_40%_30%] lg:grid-cols-[20%_10%_70%] h-16 bg-white fixed w-full top-0 z-10">
+      <div className="flex items-center ml-4">
+        <button
+          onClick={navigateTo("/home")}
+          className="font-bold text-3xl hidden lg:flex"
+        >
+          DoorHinge
+        </button>
+      </div>
 
       <div className="m-auto">
-        <button onClick={navigateTo("/home")} className="font-bold text-3xl">
+        <button
+          onClick={navigateTo("/home")}
+          className="font-bold text-3xl lg:hidden"
+        >
           DoorHinge
         </button>
       </div>
@@ -69,6 +79,12 @@ function Navbar() {
             Profile
           </button>
           <button
+            onClick={navigateTo("/create-listing")}
+            className="flex p-3 w-full"
+          >
+            Create Listing
+          </button>
+          <button
             onClick={navigateTo("/favorites")}
             className="flex p-3 w-full"
           >
@@ -83,26 +99,32 @@ function Navbar() {
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden lg:flex lg:justify-end 2xl:justify-evenly lg:items-center lg:h-full lg:text-xl">
+        <div className="hidden lg:flex lg:justify-end lg:items-center lg:h-full lg:text-xl gap-8">
           <button
             onClick={navigateTo("/profile")}
-            className="p-3 hover:text-gray-400"
+            className="hover:text-gray-400"
           >
             Profile
           </button>
           <button
+            onClick={navigateTo("/create-listing")}
+            className="hover:text-gray-400"
+          >
+            Create Listing
+          </button>
+          <button
             onClick={navigateTo("/favorites")}
-            className="p-3 hover:text-gray-400"
+            className="hover:text-gray-400"
           >
             Favorites
           </button>
           <button
             onClick={navigateTo("/messages")}
-            className="p-3 hover:text-gray-400"
+            className="hover:text-gray-400"
           >
             Messages
           </button>
-          <button onClick={handleLogout} className="p-3 hover:text-gray-400">
+          <button onClick={handleLogout} className="mr-8 hover:text-gray-400">
             Logout
           </button>
         </div>

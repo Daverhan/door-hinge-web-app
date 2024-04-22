@@ -6,6 +6,7 @@ from app.extensions import db
 import random
 import os
 import uuid
+from app.rbac_utilities import safe_db_connection, is_user_authorized
 
 listing_bp = Blueprint('listing', __name__)
 
@@ -19,32 +20,69 @@ def generate_unique_filename(original_filename):
     return new_filename
 
 
-@listing_bp.route('next-listing', methods=['GET'])
+@listing_bp.route('next-listing', methods=['POST'])
 def get_next_listing():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     user_id = session.get('user_id')
+    request_json = request.get_json()
 
-    if not user_id:
-        return jsonify({'error': 'No user attached to the request'}), 400
+    filter_fields = ['min_price', 'max_price', 'min_sqft',
+                     'max_sqft', 'min_beds', 'max_beds', 'min_baths', 'max_baths', 'zip_code']
 
-    user = User.query.get(user_id)
+    filter_settings = {field: request_json[field]
+                       for field in request_json if field in filter_fields}
 
-    if not user:
-        return jsonify({'error', 'User not found'}), 404
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
 
-    filtered_listings_ids = [
-        listing.id for listing in user.favorited_listings + user.passed_listings]
+        filtered_listings_ids = [
+            listing.id for listing in user.favorited_listings + user.passed_listings]
 
-    listings = Listing.query.filter(
-        Listing.user_id != user_id, Listing.id.notin_(filtered_listings_ids)).all()
+        listings = user_db_session.query(Listing).filter(
+            Listing.user_id != user_id, Listing.id.notin_(filtered_listings_ids)).all()
 
-    if not listings:
-        return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_LISTINGS'}), 200
+        if not listings:
+            return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_LISTINGS'}), 200
 
-    listings_data = [listing.to_dict() for listing in listings]
+        filtered_listings = []
 
-    random_listing = listings_data[random.randint(0, len(listings_data) - 1)]
+        for listing in listings:
+            include = True
 
-    return jsonify(random_listing)
+            if 'min_price' in filter_settings and 'max_price' in filter_settings:
+                include &= filter_settings['min_price'] <= listing.price <= filter_settings['max_price']
+            if 'min_sqft' in filter_settings and 'max_sqft' in filter_settings:
+                include &= filter_settings['min_sqft'] <= listing.sqft <= filter_settings['max_sqft']
+            if 'min_beds' in filter_settings and 'max_beds' in filter_settings:
+                include &= filter_settings['min_beds'] <= listing.num_beds <= filter_settings['max_beds']
+            if 'min_baths' in filter_settings and 'max_baths' in filter_settings:
+                include &= filter_settings['min_baths'] <= listing.num_baths <= filter_settings['max_baths']
+            if 'zip_code' in filter_settings:
+                include &= filter_settings['zip_code'] == listing.addresses[0].zip_code
+
+            if include:
+                filtered_listings.append(listing)
+
+        if not filtered_listings:
+            return jsonify({'error': 'No available listings to show', 'code': 'NO_AVAILABLE_FILTERED_LISTINGS'}), 200
+
+        listings_data = [listing.to_dict() for listing in filtered_listings]
+
+        random_listing = listings_data[random.randint(
+            0, len(listings_data) - 1)]
+
+    return jsonify(random_listing), 200
+
+
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
 
 
 @listing_bp.route('', methods=['GET'])
@@ -53,6 +91,14 @@ def get_listings():
     listings_data = [listing.to_dict() for listing in listings]
 
     return jsonify(listings_data)
+
+
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
 
 
 @listing_bp.route('<int:listing_id>', methods=['GET'])
@@ -67,6 +113,10 @@ def get_listing(listing_id):
 
 @listing_bp.route('', methods=['POST'])
 def create_listing():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     upload_folder = current_app.config['UPLOAD_FOLDER']
 
     listing_str_fields = ['name', 'desc',]
@@ -100,32 +150,40 @@ def create_listing():
     listing_data = {**listing_str_data, **listing_num_data}
     address_data = {**address_str_data, **address_num_data}
 
-    try:
-        listing = Listing(**listing_data, user_id=user_id)
-        db.session.add(listing)
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        try:
+            listing = Listing(**listing_data, user_id=user_id)
+            user_db_session.add(listing)
 
-        db.session.flush()
+            user_db_session.flush()
 
-        address = Address(**address_data, listing_id=listing.id)
-        db.session.add(address)
+            address = Address(**address_data, listing_id=listing.id)
+            user_db_session.add(address)
 
-        for image_file in images:
-            if image_file:
-                filename = generate_unique_filename(image_file.filename)
-                file_path_os = os.path.join(upload_folder, filename)
-                file_path_table = "images/" + filename
-                image = Image(listing_id=listing.id,
-                              name=filename, path=file_path_table)
-                db.session.add(image)
-                image_file.save(file_path_os)
+            for image_file in images:
+                if image_file:
+                    filename = generate_unique_filename(image_file.filename)
+                    file_path_os = os.path.join(upload_folder, filename)
+                    file_path_table = "images/" + filename
+                    image = Image(listing_id=listing.id,
+                                  name=filename, path=file_path_table)
+                    user_db_session.add(image)
+                    image_file.save(file_path_os)
 
-        db.session.commit()
+            user_db_session.commit()
 
-        return jsonify({"message": "Listing created successfully", **listing.to_dict()})
-    except Exception as e:
-        db.session.rollback()
+            return jsonify({"message": "Listing created successfully"}), 200
+        except Exception as e:
+            user_db_session.rollback()
+            return jsonify({'error': str(e)}), 500
 
-        return jsonify({'error': str(e)}), 500
+
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
 
 
 @listing_bp.route('<int:listing_id>', methods=['PUT'])
@@ -149,6 +207,14 @@ def update_listing(listing_id):
     db.session.commit()
 
     return jsonify({'message': 'Listing updated successfully', **listing.to_dict()}), 200
+
+
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
 
 
 @listing_bp.route('<int:listing_id>', methods=['DELETE'])

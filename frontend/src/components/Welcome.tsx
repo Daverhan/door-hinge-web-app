@@ -26,8 +26,9 @@ function Welcome() {
           Log In
         </button>
         <button
-          onClick={navigateTo("/makeaccount")}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36">
+          onClick={navigateTo("/signup")}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold text-xl py-2 px-4 rounded-full p-2 mx-2 w-36"
+        >
           Sign Up
         </button>
       </div>
