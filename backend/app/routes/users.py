@@ -9,6 +9,7 @@ from app.models.user import (User, Listing, Chat, Message, user_chat_association
 user_bp = Blueprint('user', __name__)
 
 
+
 @user_bp.route('profile', methods=['GET'])
 def get_current_user():
     user_id = session.get('user_id')
@@ -339,17 +340,21 @@ def favorite_a_listing_for_user():
             return jsonify({'error': 'Listing not found'}), 404
 
 
-        chat = Chat()
-        user_db_session.add(chat)
-        user_db_session.commit()
+        chat = user_db_session.query(Chat).filter_by(user_send=user.username, user_receive=listing.user.username).first()
 
-        new_association = {'user_id': user_id, 'chat_id': chat.id}
-        user_db_session.execute(user_chat_association.insert().values(new_association))
-        user_db_session.commit()
+        if not chat:
+            chat = Chat(user_send=user.username, user_receive=listing.user.username)
+            user_db_session.add(chat)
+            user_db_session.commit()
 
-        new_association = {'user_id': listing.user_id, 'chat_id': chat.id}
-        user_db_session.execute(user_chat_association.insert().values(new_association))
-        user_db_session.commit()
+            # Create associations for both users
+            new_association = {'user_id': user_id, 'chat_id': chat.id}
+            user_db_session.execute(user_chat_association.insert().values(new_association))
+
+            new_association = {'user_id': listing.user_id, 'chat_id': chat.id}
+            user_db_session.execute(user_chat_association.insert().values(new_association))
+
+            user_db_session.commit()
 
         new_association = {'user_id': user_id, 'listing_id': listing_id}
         user_db_session.execute(
@@ -446,3 +451,61 @@ def pass_a_listing_for_user():
         user_db_session.commit()
 
     return jsonify({'message': 'Listing successfully passed for the user'}), 201
+
+
+def process_listings(listings, user, chats_data, visited_chats):
+    for listing in listings:
+        relevant_users = set()
+
+        # Adds the owner of the listing if the user is a favorite
+        if user in listing.favorited_by_users:
+            relevant_users.add(listing.user.username)
+
+        # Adds users who favorited the user's listing
+        for other_user in listing.favorited_by_users:
+            if other_user.username != user.username:
+                relevant_users.add(other_user.username)
+
+        for other_username in relevant_users:
+            chats = Chat.query.filter(
+                ((Chat.user_send == user.username) & (Chat.user_receive == other_username)) |
+                ((Chat.user_receive == user.username) & (Chat.user_send == other_username))
+            ).all()
+            for chat in chats:
+                chat_key = tuple(sorted((user.username, other_username)))
+                if chat_key not in visited_chats:
+                    visited_chats.add(chat_key)  
+                    chats_data.append({
+                        'chat_id': chat.id,
+                        'other_user': other_username,
+                        'listing_id': listing.id,
+                        'listing_name': listing.name
+                    })
+
+
+@user_bp.route('/favorited_chats', methods=['GET'])
+def get_chats():
+    if 'user_id' not in session:
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    user_id = session['user_id']
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    favorited_listings = user.favorited_listings
+    owned_listings = user.listings 
+
+    chats_data = []
+    visited_chats = set()
+
+    process_listings(favorited_listings, user, chats_data, visited_chats)
+    process_listings(owned_listings, user, chats_data, visited_chats)
+
+    return jsonify(chats_data)
+
+
+@user_bp.route('/messages/<int:chat_id>')
+def get_messages(chat_id):
+    messages = Message.query.filter_by(chat_id=chat_id).order_by(Message.timestamp.asc()).all()
+    return jsonify([message.to_dict() for message in messages])

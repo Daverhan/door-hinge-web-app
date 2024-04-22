@@ -1,9 +1,32 @@
-import { useEffect, useState } from "react";
+import io from "socket.io-client";
+import { useEffect, useState, useRef } from "react";
+import {Chat} from "../interfaces.ts";
 
 function Messaging() {
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState([]);
- // const socket = useRef(null);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const socket = useRef(null);
+
+  useEffect(() => {
+    socket.current = io("http://localhost:5001", { withCredentials: true });  
+
+    socket.current.on('receive message', (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    socket.current.on('user connected', (data) => {
+      console.log(`${data.user} has joined the chat!`);
+    });
+
+    return () => {
+      socket.current.disconnect();
+    };
+  }, []);
+
+//  useEffect(() => {
+//    
+//  }, []);
 
   const handleMessageChange = (event) => {
     setMessageText(event.target.value);
@@ -12,8 +35,10 @@ function Messaging() {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (messageText.trim()) {
-      setMessages([...messages, messageText.trim()]);
-      setMessageText(''); 
+      socket.current.emit('send_message', {
+        data: messageText.trim()
+      });
+      setMessageText('');
     }
   };
 
@@ -22,7 +47,7 @@ function Messaging() {
       <div className="grid grid-cols-6 divide-x h-screen-adjusted">
         <div className="grid grid-cols-1 col-start-1 col-end-3 h-screen-adjusted w-100">
           <div className="flex overflow-auto row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
-            contacts will appear here
+            
           </div>
         </div>
         <div className="flex justify-evenly items-center bg-white row-span-2 col-start-3 col-end-7">
@@ -32,7 +57,9 @@ function Messaging() {
             </header>
             <div className="max-h-96 flex flex-col overflow-auto row-start-2 row-end-6 col-start-1 col-end-3 border border-gray-500 shadow-lg">
               {messages.map((msg, index) => (
-                <div key={index} className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white">{msg}</div>
+                <div key={index} className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white">
+                {msg.user}: {msg.data} (sent at {msg.timestamp} )
+                </div>
               ))}
             </div>
             <footer className="flex bg-green-50 mt-auto col-start-1 col-end-3 row-start-6 justify-items-center text-center items-center">
