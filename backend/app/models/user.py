@@ -2,6 +2,12 @@ from datetime import datetime
 from app.extensions import db
 from flask import url_for
 
+MAX_FIRST_NAME_LENGTH = 64
+MAX_LAST_NAME_LENGTH = 64
+MAX_EMAIL_LENGTH = 320
+MAX_USERNAME_LENGTH = 64
+MAX_PASSWORD_LENGTH = 100
+
 user_chat_association = db.Table('user_chat',
                                  db.Column('user_id', db.Integer, db.ForeignKey(
                                      'user.id'), primary_key=True),
@@ -23,11 +29,11 @@ user_passed_listing_association = db.Table('user_passed_listing',
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(64), nullable=False)
-    last_name = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(320), nullable=False)
-    username = db.Column(db.String(64), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(MAX_FIRST_NAME_LENGTH), nullable=False)
+    last_name = db.Column(db.String(MAX_LAST_NAME_LENGTH), nullable=False)
+    email = db.Column(db.String(MAX_EMAIL_LENGTH), nullable=False)
+    username = db.Column(db.String(MAX_USERNAME_LENGTH), nullable=False)
+    password = db.Column(db.String(MAX_PASSWORD_LENGTH), nullable=False)
     chats = db.relationship('Chat', secondary=user_chat_association,
                             backref=db.backref('users', lazy='dynamic'))
     favorited_listings = db.relationship('Listing', secondary=user_favorited_listing_association,
