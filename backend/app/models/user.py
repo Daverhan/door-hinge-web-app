@@ -16,15 +16,15 @@ user_chat_association = db.Table('user_chat',
 
 user_favorited_listing_association = db.Table('user_favorited_listing',
                                               db.Column('user_id', db.Integer, db.ForeignKey(
-                                                  'user.id'), primary_key=True),
+                                                  'user.id', ondelete='CASCADE'), primary_key=True),
                                               db.Column('listing_id', db.Integer, db.ForeignKey(
-                                                  'listing.id'), primary_key=True))
+                                                  'listing.id', ondelete='CASCADE'), primary_key=True))
 
 user_passed_listing_association = db.Table('user_passed_listing',
                                            db.Column('user_id', db.Integer, db.ForeignKey(
-                                               'user.id'), primary_key=True),
+                                               'user.id', ondelete='CASCADE'), primary_key=True),
                                            db.Column('listing_id', db.Integer, db.ForeignKey(
-                                               'listing.id'), primary_key=True))
+                                               'listing.id', ondelete='CASCADE'), primary_key=True))
 
 
 class User(db.Model):
