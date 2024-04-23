@@ -1,4 +1,4 @@
-from app.rbac_utilities import create_mysql_user, safe_db_connection
+from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated
 from app.extensions import db, bcrypt
 from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
@@ -9,13 +9,31 @@ from app.models.user import (User, Listing, Chat, Message, user_chat_association
 user_bp = Blueprint('user', __name__)
 
 
+@user_bp.route('check-auth')
+def check_user_auth():
+    authentication = is_user_authenticated()
+    if isinstance(authentication, tuple):
+        return authentication
 
+    return jsonify({'message:': 'Authenticated'})
+
+
+@user_bp.route('moderator', methods=['GET'])
+def load_moderator_page():
+    authorization = is_user_authorized('moderator')
+    if isinstance(authorization, tuple):
+        return authorization
+
+    return jsonify({'message': 'Authorized'})
+
+  
 @user_bp.route('profile', methods=['GET'])
 def get_current_user():
-    user_id = session.get('user_id')
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
 
-    if not user_id:
-        return jsonify({'error': 'Unauthorized'}), 401
+    user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).filter_by(id=user_id).first()
@@ -41,11 +59,12 @@ def get_users():
 
 @user_bp.route('<int:user_id>', methods=['GET'])
 def get_user(user_id):
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).get(user_id)
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         return jsonify({"first_name": user.first_name, "last_name": user.last_name}), 200
 
@@ -319,15 +338,14 @@ def create_message(user_id, chat_id):
 
 @user_bp.route('favorite-listings', methods=['POST'])
 def favorite_a_listing_for_user():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
-        user = user_db_session.query(User).get(user_id)
-
         listing_id_json = request.get_json()
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         if 'listing_id' not in listing_id_json:
             return jsonify({'error': 'Missing listing id'}), 404
@@ -367,17 +385,13 @@ def favorite_a_listing_for_user():
 
 @user_bp.route('favorite-listings', methods=['GET'])
 def get_favorite_a_listing_for_user():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     user_id = session.get('user_id')
 
-    if not user_id:
-        return jsonify({'error': 'User not logged in'}), 401
-
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
-        user = user_db_session.query(User).get(user_id)
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
-
         favorite_listings = (user_db_session.query(Listing).join(user_favorited_listing_association).filter(
             user_favorited_listing_association.c.user_id == user_id).all())
 
@@ -424,15 +438,14 @@ def unfavorite_a_listing_from_user(user_id, listing_id):
 
 @user_bp.route('passed-listings', methods=['POST'])
 def pass_a_listing_for_user():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
-        user = user_db_session.query(User).get(user_id)
-
         listing_id_json = request.get_json()
-
-        if not user:
-            return jsonify({'error': 'User not found'}), 404
 
         if 'listing_id' not in listing_id_json:
             return jsonify({'error': 'Missing listing id'}), 404

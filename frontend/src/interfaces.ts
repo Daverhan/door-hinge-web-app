@@ -43,6 +43,11 @@ export interface FilterFields {
   zip_code: number;
 }
 
+export interface AuthenticationContext {
+  isAuthenticated: boolean;
+  htmlContent: string;
+}
+
 export interface Chat {
   name: string;
   first_name: string;

@@ -2,6 +2,8 @@ from app.extensions import db
 from contextlib import contextmanager
 from sqlalchemy import text, create_engine
 from sqlalchemy.orm import sessionmaker
+from flask import render_template, session
+from sqlalchemy import text
 
 
 def create_mysql_user(username, password, role):
@@ -59,3 +61,27 @@ def safe_db_connection(username, password):
         yield user_db_session
     finally:
         user_db_session.close()
+
+
+def is_user_authorized(required_role):
+    authentication = is_user_authenticated()
+    if isinstance(authentication, tuple):
+        return authentication
+
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        grants = user_db_session.execute(text('SHOW GRANTS;')).fetchall()
+
+        for grant in grants:
+            if required_role in grant[0]:
+                return True
+
+    return render_template('forbidden.html'), 403
+
+
+def is_user_authenticated():
+    user_id = session.get('user_id')
+
+    if not user_id:
+        return render_template('unauthorized.html'), 401
+
+    return True

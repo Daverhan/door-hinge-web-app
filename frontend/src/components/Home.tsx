@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Carousel } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import { User, Listing, FilterFields } from "../interfaces";
+import NoListingsFoundImage from "../assets/no-listings.webp";
 
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
@@ -9,6 +10,7 @@ function Home() {
   const [noListingsAlert, setNoListingsAlert] = useState(false);
   const [invalidFiltersAlert, setInvalidFiltersAlert] = useState(false);
   const [carouselKey, setCarouselKey] = useState(0);
+  const [displayNoListingsImage, setDisplayNoListingsImage] = useState(false);
   const [filterFields, setFilterFields] = useState<FilterFields>({
     min_price: 0,
     max_price: 0,
@@ -37,9 +39,11 @@ function Home() {
       setInvalidFiltersAlert(true);
       setListing(null);
       setLister(null);
+      setDisplayNoListingsImage(true);
       return;
     } else {
       setInvalidFiltersAlert(false);
+      setDisplayNoListingsImage(false);
     }
 
     const filterFieldsToSend = {};
@@ -89,6 +93,7 @@ function Home() {
       setNoListingsAlert(true);
       setListing(null);
       setLister(null);
+      setDisplayNoListingsImage(true);
       return;
     }
 
@@ -96,6 +101,7 @@ function Home() {
       setInvalidFiltersAlert(true);
       setListing(null);
       setLister(null);
+      setDisplayNoListingsImage(true);
       return;
     }
 
@@ -196,7 +202,7 @@ function Home() {
             <strong className="font-bold">Invalid Filter Settings. </strong>
             <span className="block sm:inline">
               Either no listings matched the criteria entered or the minimum
-              value is higher than the maximum value (unless the maximum is 0,
+              value is higher than the maximum value (unless both are 0,
               denoting no filter).
             </span>
           </div>
@@ -347,41 +353,58 @@ function Home() {
           </form>
         </div>
         <div className="grid grid-rows-[47.5%_40%_12.5%] lg:grid-rows-[45%_45%_10%] h-screen-adjusted">
-          <div>
-            {listing?.images ? (
-              <Carousel
-                key={carouselKey}
-                loop={true}
-                className="z-0"
-                placeholder={<p className="text-3xl">Loading...</p>}
-              >
-                {listing?.images.map((image) => (
-                  <img
-                    key={image.id}
-                    src={import.meta.env.VITE_API_TARGET + image.path}
-                    alt={`image ${image.id}`}
-                    className="object-cover h-full w-full"
-                  />
-                ))}
-              </Carousel>
-            ) : null}
-          </div>
-          <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words">
-            <p>
-              Listing posted by: {lister?.first_name} {lister?.last_name}
-            </p>
-            <p>
-              Address: {listing?.addresses[0].house_num}{" "}
-              {listing?.addresses[0].street_name}, {listing?.addresses[0].city},{" "}
-              {listing?.addresses[0].state} {listing?.addresses[0].zip_code}
-            </p>
-            <p>Price: ${listing?.price}</p>
-            <p className="my-2">{listing?.desc}</p>
-            <p>
-              {listing?.num_beds} BED / {listing?.num_baths} BATH
-            </p>
-            <p>{listing?.sqft} SQFT</p>
-          </div>
+          {listing ? (
+            <div>
+              {listing?.images ? (
+                <Carousel
+                  key={carouselKey}
+                  loop={true}
+                  className="z-0"
+                  placeholder={<p className="text-3xl">Loading...</p>}
+                >
+                  {listing?.images.map((image) => (
+                    <img
+                      key={image.id}
+                      src={import.meta.env.VITE_API_TARGET + image.path}
+                      alt={`image ${image.id}`}
+                      className="h-full w-full"
+                    />
+                  ))}
+                </Carousel>
+              ) : null}
+            </div>
+          ) : displayNoListingsImage ? (
+            <div>
+              <img
+                className="mt-16 lg:mt-8 w-full h-full"
+                src={NoListingsFoundImage}
+              />
+            </div>
+          ) : (
+            <div></div>
+          )}
+
+          {listing ? (
+            <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words">
+              <p>
+                Listing posted by: {lister?.first_name} {lister?.last_name}
+              </p>
+              <p>
+                Address: {listing?.addresses[0].house_num}{" "}
+                {listing?.addresses[0].street_name},{" "}
+                {listing?.addresses[0].city}, {listing?.addresses[0].state}{" "}
+                {listing?.addresses[0].zip_code}
+              </p>
+              <p>Price: ${listing?.price}</p>
+              <p className="my-2">{listing?.desc}</p>
+              <p>
+                {listing?.num_beds} BED / {listing?.num_baths} BATH
+              </p>
+              <p>{listing?.sqft} SQFT</p>
+            </div>
+          ) : (
+            <div className="flex flex-col bg-green-200 pl-2 pt-2 items-left overflow-hidden break-words"></div>
+          )}
           <div className="flex justify-evenly items-center bg-orange-300">
             <button
               onClick={passListing}
