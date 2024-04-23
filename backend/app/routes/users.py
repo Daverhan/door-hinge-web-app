@@ -445,17 +445,18 @@ def unfavorite_a_listing_from_user():
     
     listing_id = listing_id_json['listing_id']
 
-    listing = Listing.query.get(listing_id)
-    if not listing:
-        return jsonify({'error': 'Listing not found'}), 404
-    
-    association = user_favorited_listing_association.delete().where(
-        (user_favorited_listing_association.c.user_id == user_id) &
-        (user_favorited_listing_association.c.listing_id == listing_id)
-    )
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        listing = Listing.query.get(listing_id)
+        if not listing:
+            return jsonify({'error': 'Listing not found'}), 404
+        
+        association = user_favorited_listing_association.delete().where(
+            (user_favorited_listing_association.c.user_id == user_id) &
+            (user_favorited_listing_association.c.listing_id == listing_id)
+        )
 
-    db.session.execute(association) 
-    db.session.commit()
+        db.session.execute(association) 
+        db.session.commit()
 
     return jsonify({'message': 'Listing successfully unfavorited from the user'}), 200
 
