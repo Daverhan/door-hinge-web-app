@@ -99,13 +99,16 @@ function EditProfile() {
 
         if (inputFieldsTooLong) return;
 
-        fetch("/api/users", {
+        fetch("/api/users/editprofile", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formValues),
         }).then((response) => {
             if (response.status === 409) {
                 setError409Flag(true);
+            }
+            else if (response.ok) {
+                navigate("/profile");
             }
             else {
                 setServerErrorFlag(true);
@@ -187,19 +190,19 @@ function EditProfile() {
                                 Input fields cannot be empty
                             </p>
                         ) : null}
-                        <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+                        {/* <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
                             onClick={navigateTo("/reset-password")}>
                             Reset Password
                         </button>
-                        <div className="py-1"></div>
+                        <div className="py-1"></div> */}
                         <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
                             Save Changes
                         </button>
-                        <div className="py-1"></div>
+                        {/* <div className="py-1"></div>
                         <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
                             onClick={navigateTo("/Goodbye")}>
                             Delete Account
-                        </button>
+                        </button> */}
                         <div className="py-1"></div>
                     </form>
                 </div>
