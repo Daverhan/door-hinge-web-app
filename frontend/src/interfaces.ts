@@ -47,3 +47,10 @@ export interface AuthenticationContext {
   isAuthenticated: boolean;
   htmlContent: string;
 }
+
+export interface Chat {
+  name: string;
+  first_name: string;
+  last_name: string;
+  chat_id: number;
+}

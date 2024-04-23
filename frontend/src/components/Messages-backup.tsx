@@ -5,85 +5,40 @@ import {Chat} from "../interfaces.ts";
 function Messaging() {
   const [messageText, setMessageText] = useState('');
   const [messages, setMessages] = useState([]);
-  const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [currentChatUser, setCurrentChatUser] = useState(null);
-  const [username, setUsername] = useState(null);
   const socket = useRef(null);
 
   useEffect(() => {
-    const storedUsername = sessionStorage.getItem('username');
-    setUsername(storedUsername);
-    fetch('http://localhost:5001/api/users/favorited_chats', {
-      credentials: 'include'
-    })    
-    .then(response => response.json())
-    .then(data => {
-      setChats(data);
-      })
-    .catch(error => console.error('Error fetching data: ', error));
-  }, []);
-
-  const connectToChat = (username) => {
-    setCurrentChatUser(username);
-    if (socket.current) {
-      socket.current.disconnect();
-    }
-
-    socket.current = io("http://localhost:5001", {
-      query: { username },
-      withCredentials: true
-    });
+    socket.current = io("http://localhost:5001", { withCredentials: true });  
 
     socket.current.on('receive message', (message) => {
-        setMessages(prevMessages => [...prevMessages, {
-          ...message,
-          sender_name: message.sender_name,
-          content: message.content,
-          timestamp: message.timestamp
-      }]);
+      setMessages((prevMessages) => [...prevMessages, message]);
     });
 
     socket.current.on('user connected', (data) => {
-        console.log(`${data.user} has joined the chat!`);
+      console.log(`${data.user} has joined the chat!`);
     });
 
-  };
+    return () => {
+      socket.current.disconnect();
+    };
+  }, []);
 
-  const handleChatBoxClick = (chat) => {
-    setChatId(chat.chat_id);
-    setCurrentChatUser(chat.other_user);
-    connectToChat(chat.other_user);
-    fetchMessages(chat.chat_id);
-  };
+//  useEffect(() => {
+//    
+//  }, []);
 
-  const fetchMessages = (chatId) => {
-      fetch(`http://localhost:5001/api/users/messages/${chatId}`, {
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        setMessages(data);
-    })
-    .catch(error => console.error('Error fetching messages: ', error));
-  };
-    
   const handleMessageChange = (event) => {
     setMessageText(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Submitting message:", messageText, "from user:", username, "for chat:", chatId);
-    if (messageText.trim() && chatId && username) {
+    if (messageText.trim()) {
       socket.current.emit('send_message', {
-        chat_id: chatId,
-        content: messageText.trim(),
-        sender_name: username
+        data: messageText.trim()
       });
       setMessageText('');
-    } else {
-      console.log("No chat ID or message");
     }
   };
 
@@ -92,22 +47,18 @@ function Messaging() {
       <div className="grid grid-cols-6 divide-x h-screen-adjusted">
         <div className="grid grid-cols-1 col-start-1 col-end-3 h-screen-adjusted w-100">
           <div className="flex overflow-auto row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
-            {chats.map((chat, index) => (
-              <div key={index} className="p-3 m-2 bg-gray-200 rounded shadow cursor-pointer" onClick={() => handleChatBoxClick(chat)}>
-                Chat with: {chat.other_user}
-              </div>
-            ))}
+            
           </div>
         </div>
         <div className="flex justify-evenly items-center bg-white row-span-2 col-start-3 col-end-7">
           <div className="grid items grid-cols-2 grid-rows-6 w-full h-full space-x-0 space-y-0">
             <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center text-center items-center mt-0 h-1/2">
-              Messaging {currentChatUser ? `${currentChatUser}` : ''}
+              Messaging [Contact.Name]
             </header>
             <div className="max-h-96 flex flex-col overflow-auto row-start-2 row-end-6 col-start-1 col-end-3 border border-gray-500 shadow-lg">
               {messages.map((msg, index) => (
                 <div key={index} className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white">
-                  {msg.sender_name}: {msg.content} (sent at {msg.timestamp})
+                {msg.user}: {msg.data} (sent at {msg.timestamp} )
                 </div>
               ))}
             </div>
