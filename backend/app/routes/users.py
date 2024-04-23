@@ -23,8 +23,11 @@ def load_moderator_page():
     authorization = is_user_authorized('moderator')
     if isinstance(authorization, tuple):
         return authorization
-
-    return jsonify({'message': 'Authorized'})
+    
+    with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
+        all_listings = moderator_db_session.query(Listing).all()
+        all_listings_data = [listing.to_dict() for listing in all_listings]
+        return jsonify(all_listings_data), 200
 
 
 @user_bp.route('profile', methods=['GET'])
@@ -398,29 +401,30 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 '''
 
 
-@user_bp.route('<int:user_id>/favorite-listings/<int:listing_id>', methods=['DELETE'])
-def unfavorite_a_listing_from_user(user_id, listing_id):
-    user = User.query.get(user_id)
+@user_bp.route('favorite-listings', methods=['DELETE'])
+def unfavorite_a_listing_from_user():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+    
+    user_id = session.get('user_id')
+
+    listing_id_json = request.get_json()
+    if 'listing_id' not in listing_id_json:
+        return jsonify({'error': 'Missing listing id'}), 404
+    
+    listing_id = listing_id_json['listing_id']
+
     listing = Listing.query.get(listing_id)
-
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
     if not listing:
         return jsonify({'error': 'Listing not found'}), 404
-
-    association_exists = db.session.query(db.exists().where(
+    
+    association = user_favorited_listing_association.delete().where(
         (user_favorited_listing_association.c.user_id == user_id) &
         (user_favorited_listing_association.c.listing_id == listing_id)
-    )).scalar()
+    )
 
-    if not association_exists:
-        return jsonify({'error': 'Cannot unfavorite the specified listing from the user as it was not favorited'}), 404
-
-    db.session.execute(user_favorited_listing_association.delete().where(
-        (user_favorited_listing_association.c.user_id == user_id) &
-        (user_favorited_listing_association.c.listing_id == listing_id)
-    ))
+    db.session.execute(association) 
     db.session.commit()
 
     return jsonify({'message': 'Listing successfully unfavorited from the user'}), 200
