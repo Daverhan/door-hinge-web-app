@@ -295,45 +295,39 @@ def delete_user_chat(user_id, chat_id):
     return jsonify({'message': 'Chat successfully removed from the user'}), 200
 
 
-'''
-IMPORTANT:
-THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
-- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
-- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
-'''
-
 
 @user_bp.route('<int:user_id>/chats/<int:chat_id>/messages', methods=['POST'])
 def create_message(user_id, chat_id):
-    message_json = request.get_json()
+    authorization = is_user_authorized('user') 
+    if isinstance(authorization, tuple):
+        return authorization
 
-    user = User.query.get(user_id)
-    chat = Chat.query.get(chat_id)
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        message_json = request.get_json()
 
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+        user = user_db_session.query(User).get(user_id)
+        chat = user_db_session.query(Chat).get(chat_id)
 
-    if not chat:
-        return jsonify({'error': 'Chat not found'}), 404
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
 
-    association_exists = db.session.query(db.exists().where(
-        (user_chat_association.c.user_id == user_id) &
+        association_exists = user_db_session.query(db.exists().where(
+            (user_chat_association.c.user_id == user_id) &
             (user_chat_association.c.chat_id == chat_id)
-    )).scalar()
+        )).scalar()
+        if not association_exists:
+            return jsonify({'error': 'No such chat found for the user'}), 404
 
-    if not association_exists:
-        return jsonify({'error': 'No such chat found for the user'}), 404
+        if 'content' not in message_json or not message_json['content'].strip():
+            return jsonify({'error': 'Missing message content'})
 
-    if 'content' not in message_json or not (message_json['content']).strip():
-        return jsonify({'error': 'Missing message content'})
+        message = Message(content=message_json['content'], chat_id=chat_id, sender_id=user_id)
+        user_db_session.add(message)
+        user_db_session.commit()
 
-    message = Message(
-        content=message_json['content'], chat_id=chat_id, sender_id=user_id)
-
-    db.session.add(message)
-    db.session.commit()
-
-    return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
+        return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
 
 
 @user_bp.route('favorite-listings', methods=['POST'])
@@ -345,6 +339,7 @@ def favorite_a_listing_for_user():
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
         listing_id_json = request.get_json()
 
         if 'listing_id' not in listing_id_json:
