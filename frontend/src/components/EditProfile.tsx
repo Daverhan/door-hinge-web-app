@@ -4,22 +4,53 @@ function EditProfile() {
     const formRef = useRef<HTMLFormElement>(null);
     const [error409Flag, setError409Flag] = useState(false);
     const [emptyInputFlag, setEmptyInputFlag] = useState(false);
+    const [serverErrorFlag, setServerErrorFlag] = useState(false);
+    const [firstNameTooLong, setfirstNameTooLong] = useState(false);
+    const [lastNameTooLong, setLastNameTooLong] = useState(false);
+    const [emailTooLong, setEmailTooLong] = useState(false);
+    const [usernameTooLong, setUsernameTooLong] = useState(false);
+    const [passwordTooLong, setPasswordTooLong] = useState(false);
+
+    const MAX_FIRST_NAME_LENGTH = 64;
+    const MAX_LAST_NAME_LENGTH = 64;
+    const MAX_USERNAME_LENGTH = 64;
+
+    const [data, setData] = useState({
+        first_name: "",
+        last_name: "",
+        username: "",
+        id: "",
+    });
+
     const navigate = useNavigate();
+
     const navigateTo = (path: string) => () => {
         navigate(path);
     };
+
+    const getInputClasses = (isTooLong: boolean) => {
+        const baseClasses =
+            "appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white";
+        const errorClasses = "border-red-500";
+        return `${baseClasses} ${isTooLong ? errorClasses : "border-gray-200"}`;
+    };
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         if (!formRef.current) {
             return;
         }
+
         let emptyInputFields = false;
         e.preventDefault();
+
         const formData = new FormData(formRef.current);
+
         const formValues = {
             first_name: formData.get("first-name"),
             last_name: formData.get("last-name"),
             username: formData.get("username"),
         };
+
         Object.values(formValues).forEach((value) => {
             if (!value) {
                 setEmptyInputFlag(true);
@@ -27,11 +58,47 @@ function EditProfile() {
                 emptyInputFields = true;
             }
         });
+
         if (emptyInputFields) {
             return;
         } else {
             setEmptyInputFlag(false);
         }
+
+        let inputFieldsTooLong = false;
+
+        if (
+            typeof formValues.first_name === "string" &&
+            formValues.first_name.length > MAX_FIRST_NAME_LENGTH
+        ) {
+            setfirstNameTooLong(true);
+            inputFieldsTooLong = true;
+        } else {
+            setfirstNameTooLong(false);
+        }
+
+        if (
+            typeof formValues.last_name === "string" &&
+            formValues.last_name.length > MAX_LAST_NAME_LENGTH
+        ) {
+            setLastNameTooLong(true);
+            inputFieldsTooLong = true;
+        } else {
+            setLastNameTooLong(false);
+        }
+
+        if (
+            typeof formValues.username === "string" &&
+            formValues.username.length > MAX_USERNAME_LENGTH
+        ) {
+            setUsernameTooLong(true);
+            inputFieldsTooLong = true;
+        } else {
+            setUsernameTooLong(false);
+        }
+
+        if (inputFieldsTooLong) return;
+
         fetch("/api/users", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -39,24 +106,12 @@ function EditProfile() {
         }).then((response) => {
             if (response.status === 409) {
                 setError409Flag(true);
-            } else {
-                navigate("/profile");
+            }
+            else {
+                setServerErrorFlag(true);
             }
         });
-    };
-    const [data, setData] = useState({
-        first_name: "",
-        last_name: "",
-        username: "",
-        id: "",
-    });
-    useEffect(() => {
-        fetch("/api/users/profile")
-            .then((res) => res.json())
-            .then((jsonData) => {
-                setData(jsonData);
-            });
-    }, []);
+    }
     return (
         <section className="bg-blue-100 h-screen pt-16">
             <div>

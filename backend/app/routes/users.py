@@ -138,28 +138,6 @@ def register_user():
 
     return jsonify({'error': 'Missing required fields'}), 400
 
-@user_bp.route('<int:user_id>', methods=['PUT'])
-def update_listing(user_id):
-    user_json = request.get_json()
-    user = User.query.get(user_id)
-
-    updatable_fields = ['username', 'password',
-                        'first_name', 'last_name']
-
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    if not any(field in user_json for field in updatable_fields):
-        return jsonify({'message': 'At least one updatable field must be provided'})
-
-    for field in updatable_fields:
-        if field in user_json:
-            setattr(user, field, user_json[field])
-
-    db.session.commit()
-
-    return jsonify({'message': 'User updated successfully', **user.to_dict()}), 200
-
 '''
 IMPORTANT:
 THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
@@ -167,29 +145,36 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 - API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
 '''
 
-
-@user_bp.route('<int:user_id>', methods=['PUT'])
-def update_user(user_id):
+@user_bp.route('/editprofile', methods=['PUT'])
+def update_user():
     user_json = request.get_json()
-    user = User.query.get(user_id)
 
-    updatable_fields = ['first_name', 'last_name',
-                        'email', 'username', 'password']
+    # Define required fields for the update
+    required_fields = ['first_name', 'last_name', 'username']
+    if not all(field in user_json for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
 
-    if not user:
+    # Check if the update is attempting to use a username that already exists
+    current_user_id = session.get('user_id')  # Get current user ID from session
+    if User.query.filter(User.username == user_json['username'], User.id != current_user_id).first():
+        return jsonify({'error': 'A user already exists with the provided username'}), 409
+
+    # Validate length of each field
+    if (len(user_json['first_name']) > MAX_FIRST_NAME_LENGTH or
+        len(user_json['last_name']) > MAX_LAST_NAME_LENGTH or
+        len(user_json['username']) > MAX_USERNAME_LENGTH):
+        return jsonify({'error': 'One or more input fields are over the maximum character limit', 'code': 'MAX_INPUT_LIMIT'}), 400
+
+    # Update user data
+    user = User.query.filter_by(id=current_user_id).first()
+    if user:
+        user.first_name = user_json['first_name']
+        user.last_name = user_json['last_name']
+        user.username = user_json['username']
+        db.session.commit()
+        return jsonify({'message': 'User updated successfully'}), 200
+    else:
         return jsonify({'error': 'User not found'}), 404
-
-    if not any(field in user_json for field in updatable_fields):
-        return jsonify({'message': 'At least one updatable field must be provided'})
-
-    for field in updatable_fields:
-        if field in user_json:
-            setattr(user, field, user_json[field])
-
-    db.session.commit()
-
-    return jsonify({'message': 'User updated successfully', **user.to_dict()}), 200
-
 
 '''
 IMPORTANT:
