@@ -37,7 +37,8 @@ def create_roles():
         text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.address TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.image TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT ON project.chat TO 'user'@'localhost';"),
-        text(f"GRANT SELECT, INSERT ON project.user_chat TO 'user'@'localhost';")]
+        text(f"GRANT SELECT, INSERT ON project.user_chat TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT ON project.message TO 'user'@'localhost';")]
 
     with db.engine.connect() as connection:
         for sql_statement in roles_sql + grants_sql:

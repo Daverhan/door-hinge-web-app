@@ -2,7 +2,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_session import Session
-from flask_socketio import SocketIO
 from app.routes.users import user_bp
 from app.routes.listings import listing_bp
 from app.extensions import db, bcrypt, socketio
@@ -10,9 +9,10 @@ from dotenv import load_dotenv
 import os
 from datetime import timedelta
 from app.rbac_utilities import create_roles
-from .routes import chat
+import app.routes.chats  # this is required
 
 load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
@@ -34,9 +34,11 @@ def create_app():
     Migrate(app, db)
     Session(app)
 
-    socketio.init_app(app, async_mode='threading', cors_allowed_origins=["http://localhost:5173"], manage_session=False, logger=True, engineio_logger=True)
+    socketio.init_app(app, async_mode='threading', cors_allowed_origins=[os.environ.get(
+        'CLIENT_APPLICATION_TARGET')], manage_session=False)
 
-    CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": ["http://localhost:5173"]}})
+    CORS(app, supports_credentials=True, resources={
+         r"/api/*": {"origins": [os.environ.get('CLIENT_APPLICATION_TARGET')]}})
 
     with app.app_context():
         create_roles()
