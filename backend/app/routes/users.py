@@ -4,7 +4,7 @@ from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
                              user_favorited_listing_association, user_passed_listing_association,
                              MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH,
-                             MAX_USERNAME_LENGTH)
+                             MAX_USERNAME_LENGTH, Address, Image)
 
 user_bp = Blueprint('user', __name__)
 
@@ -29,6 +29,36 @@ def load_moderator_page():
         all_listings_data = [listing.to_dict() for listing in all_listings]
         return jsonify(all_listings_data), 200
 
+@user_bp.route('/moderator/delete', methods=['DELETE'])
+def delete_a_listing_as_moderator():
+    authorization = is_user_authorized('moderator')
+    if isinstance(authorization, tuple):
+        return authorization
+    
+    data = request.get_json()
+    listing_id = data.get('listing_id')
+
+    if not listing_id:
+        return jsonify({'error': 'Listing ID is required.'});
+
+    with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
+            moderator_db_session.query(Address).filter(Address.listing_id == listing_id).delete(synchronize_session='fetch')
+
+            moderator_db_session.query(Image).filter(Image.listing_id == listing_id).delete(synchronize_session='fetch')
+
+            moderator_db_session.query(user_favorited_listing_association).filter(user_favorited_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
+
+            moderator_db_session.query(user_passed_listing_association).filter(user_passed_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
+
+            listing_to_delete = moderator_db_session.query(Listing).get(listing_id)
+            if listing_to_delete is None:
+                return jsonify({'error': 'Listing not found.'}), 404
+
+            moderator_db_session.delete(listing_to_delete)
+
+            moderator_db_session.commit()
+
+            return jsonify({'message': 'Listing deleted successfully.'}), 200
 
 @user_bp.route('profile', methods=['GET'])
 def get_current_user():
