@@ -48,6 +48,7 @@ function Login() {
         setEmptyInputFlag(false);
         return;
       } else {
+        sessionStorage.setItem('username', formValues.username);
         navigate("/home");
       }
     };
@@ -125,7 +126,7 @@ function Login() {
               <div className="px-4"></div>
               <button
                 type="button"
-                onClick={navigateTo("/makeaccount")}
+                onClick={navigateTo("/signup")}
                 className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
               >
                 Create new account

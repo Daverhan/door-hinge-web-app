@@ -2,6 +2,12 @@ from datetime import datetime
 from app.extensions import db
 from flask import url_for
 
+MAX_FIRST_NAME_LENGTH = 64
+MAX_LAST_NAME_LENGTH = 64
+MAX_EMAIL_LENGTH = 320
+MAX_USERNAME_LENGTH = 64
+MAX_PASSWORD_LENGTH = 100
+
 user_chat_association = db.Table('user_chat',
                                  db.Column('user_id', db.Integer, db.ForeignKey(
                                      'user.id'), primary_key=True),
@@ -23,11 +29,11 @@ user_passed_listing_association = db.Table('user_passed_listing',
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String(64), nullable=False)
-    last_name = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(320), nullable=False)
-    username = db.Column(db.String(64), nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+    first_name = db.Column(db.String(MAX_FIRST_NAME_LENGTH), nullable=False)
+    last_name = db.Column(db.String(MAX_LAST_NAME_LENGTH), nullable=False)
+    email = db.Column(db.String(MAX_EMAIL_LENGTH), nullable=False)
+    username = db.Column(db.String(MAX_USERNAME_LENGTH), nullable=False)
+    password = db.Column(db.String(MAX_PASSWORD_LENGTH), nullable=False)
     chats = db.relationship('Chat', secondary=user_chat_association,
                             backref=db.backref('users', lazy='dynamic'))
     favorited_listings = db.relationship('Listing', secondary=user_favorited_listing_association,
@@ -125,24 +131,30 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender_name = db.Column(db.String(500), nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
             'content': self.content,
-            'timestamp': self.timestamp,
+            'timestamp': self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'chat_id': self.chat_id,
-            'sender_id': self.sender_id
+            'sender_id': self.sender_id,
+            'sender_name': self.sender_name
         }
 
 
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_send = db.Column(db.String(MAX_FIRST_NAME_LENGTH + MAX_LAST_NAME_LENGTH), nullable=False)
+    user_receive = db.Column(db.String(MAX_FIRST_NAME_LENGTH + MAX_LAST_NAME_LENGTH), nullable=False)
     messages = db.relationship(
         'Message', backref='chat', lazy=True)
 
     def to_dict(self):
         return {
             'id': self.id,
+            'user_send': self.user_send,
+            'user_receive': self.user_receive,
             'messages': [message.to_dict() for message in self.messages]
         }

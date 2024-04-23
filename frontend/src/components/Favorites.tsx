@@ -1,40 +1,15 @@
 import React, { useEffect } from "react";
 import Modal from "./Modal";
+import { Listing } from "../interfaces";
 //import { Carousel } from "@material-tailwind/react";
 
-interface FavoriteProperty {
-  id: number;
-  name: string;
-  addresses: Address[];
-  price: string;
-  images: Image[];
-  num_beds: number;
-  num_baths: number;
-  sqft: number;
-}
-
-interface Address {
-  id: number;
-  listing_id: number;
-  house_num: number;
-  street_name: string;
-  city: string;
-  state: string;
-  zip_code: number;
-}
-
-interface Image {
-  id: number;
-  path: string;
-}
-
 function Favorites() {
-  const [favorites, setFavorites] = React.useState<FavoriteProperty[]>([]);
+  const [favorites, setFavorites] = React.useState<Listing[]>([]);
   const [selectedProperty, setSelectedProperty] =
-    React.useState<FavoriteProperty | null>(null);
+    React.useState<Listing | null>(null);
   const [isModalOpen, setIsModalOpen] = React.useState<boolean>(false);
 
-  const openModal = (property: FavoriteProperty) => {
+  const openModal = (property: Listing) => {
     setSelectedProperty(property);
     setIsModalOpen(true);
   };
