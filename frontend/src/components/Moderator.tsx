@@ -21,6 +21,23 @@ function Moderator() {
     setSelectedProperty(null);
   }
 
+  const removeListing = async (property_id: number) => {
+    console.log(`Attempting to remove listing with ID: ${property_id}`);
+    const response = await fetch(`/api/users/moderator/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({listing_id: property_id})
+    });
+
+    if(response.ok) {
+      console.log('Response OK. Listing should be deleted.');
+      setListings(currentProperties => currentProperties.filter(property => property.id !== property_id)
+      );
+    }
+  };
+
   useEffect(() => {
     fetch("/api/users/moderator")
       .then((response) => {
@@ -75,6 +92,12 @@ function Moderator() {
                   onClick={() => openModal(property)}
                 >
                   View Property
+                </button>
+                <button
+                  className="mt-2 py-2 px-4 bg-red-500 text-white rounded hover:bg-red-700 transition duration-200"
+                  onClick={() => removeListing(property?.id)}
+                >
+                  Delete
                 </button>
               </div>
             </div>
