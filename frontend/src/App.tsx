@@ -8,15 +8,70 @@ import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
 import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+import EditProfile from "./components/EditProfile";
+import ResetPassword from "./components/ResetPassword";
+import Goodbye from "./components/Goodbye";
+=======
+>>>>>>> 2b331b28929496ef987311c2c5cf07561e07b187
 import Moderator from "./components/Moderator";
 import EditProfile from "./components/EditProfile";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+<<<<<<< HEAD
 import ResetPassword from "./components/ResetPassword";
+=======
+>>>>>>> origin/main
+>>>>>>> 2b331b28929496ef987311c2c5cf07561e07b187
 
 function App() {
   return (
     <Router>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+      <main>
+        <Routes>
+          <Route path="/" element={<Welcome />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/makeaccount" element={<MakeAccount />} />
+          <Route path="/favorites" element={<Favorites />} />
+          <Route path="/EditProfile" element={<EditProfile />} />
+          <Route path="/ResetPassword" element={<ResetPassword />} />
+          <Route path="/Goodbye" element={<Goodbye />} />
+          <Route
+            path="/home"
+            element={
+              <>
+                <Navbar />
+                <Home />
+              </>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <>
+                <Navbar />
+                <Profile />
+              </>
+            }
+          />
+          <Route
+            path="/create-listing"
+            element={
+              <>
+                <Navbar />
+                <CreateListing />
+              </>
+            }
+          />
+        </Routes>
+      </main>
+=======
+>>>>>>> 2b331b28929496ef987311c2c5cf07561e07b187
       <AuthProvider>
         <main>
           <Routes>
@@ -113,7 +168,12 @@ function App() {
           </Routes>
         </main>
       </AuthProvider>
+<<<<<<< HEAD
     </Router >
+=======
+>>>>>>> origin/main
+    </Router>
+>>>>>>> 2b331b28929496ef987311c2c5cf07561e07b187
   );
 }
 
