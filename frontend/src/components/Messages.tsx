@@ -1,9 +1,9 @@
 import io from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
-import {Chat} from "../interfaces.ts";
+import { Chat } from "../interfaces.ts";
 
 function Messaging() {
-  const [messageText, setMessageText] = useState('');
+  const [messageText, setMessageText] = useState("");
   const [messages, setMessages] = useState([]);
   const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState<Chat[]>([]);
@@ -12,40 +12,46 @@ function Messaging() {
   const socket = useRef(null);
 
   useEffect(() => {
-    const storedUsername = sessionStorage.getItem('username');
+    const storedUsername = sessionStorage.getItem("username");
     setUsername(storedUsername);
-    fetch('http://localhost:5001/api/users/favorited_chats', {
-      credentials: 'include'
-    })    
-    .then(response => response.json())
-    .then(data => {
-      setChats(data);
+    fetch(
+      import.meta.env.VITE_SOCKET_API_TARGET + "/api/users/favorited_chats",
+      {
+        credentials: "include",
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setChats(data);
       })
-    .catch(error => console.error('Error fetching data: ', error));
+      .catch((error) => console.error("Error fetching data: ", error));
   }, []);
 
-const connectToChat = (chat) => {
+  const connectToChat = (chat) => {
     setChatId(chat.chat_id);
     setCurrentChatUser(chat.other_user);
     if (socket.current) {
       socket.current.disconnect();
     }
 
-    socket.current = io("http://localhost:5001", {
+    socket.current = io(import.meta.env.VITE_SOCKET_API_TARGET, {
       query: { username },
-      withCredentials: true
+      withCredentials: true,
     });
 
-    socket.current.emit('join_room', { room: chat.chat_id });
+    socket.current.emit("join_room", { room: chat.chat_id });
 
-    socket.current.on('receive message', (message) => {
-      console.log('Received message:', message);
-      setMessages(prevMessages => [...prevMessages, {
-        ...message,
-        sender_name: message.sender_name,
-        content: message.content,
-        timestamp: message.timestamp
-      }]);
+    socket.current.on("receive message", (message) => {
+      console.log("Received message:", message);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          ...message,
+          sender_name: message.sender_name,
+          content: message.content,
+          timestamp: message.timestamp,
+        },
+      ]);
     });
   };
 
@@ -57,30 +63,40 @@ const connectToChat = (chat) => {
   };
 
   const fetchMessages = (chatId) => {
-      fetch(`http://localhost:5001/api/users/messages/${chatId}`, {
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
+    fetch(
+      import.meta.env.VITE_SOCKET_API_TARGET + `/api/users/messages/${chatId}`,
+      {
+        credentials: "include",
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
         setMessages(data);
-    })
-    .catch(error => console.error('Error fetching messages: ', error));
+      })
+      .catch((error) => console.error("Error fetching messages: ", error));
   };
-    
+
   const handleMessageChange = (event) => {
     setMessageText(event.target.value);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log("Submitting message:", messageText, "from user:", username, "for chat:", chatId);
+    console.log(
+      "Submitting message:",
+      messageText,
+      "from user:",
+      username,
+      "for chat:",
+      chatId
+    );
     if (messageText.trim() && chatId && username) {
-      socket.current.emit('send_message', {
+      socket.current.emit("send_message", {
         chat_id: chatId,
         content: messageText.trim(),
-        sender_name: username
+        sender_name: username,
       });
-      setMessageText('');
+      setMessageText("");
     } else {
       console.log("No chat ID or message");
     }
@@ -92,7 +108,11 @@ const connectToChat = (chat) => {
         <div className="grid grid-cols-1 col-start-1 col-end-3 h-screen-adjusted w-100">
           <div className="flex overflow-auto row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
             {chats.map((chat, index) => (
-              <div key={index} className="p-3 m-2 bg-gray-200 rounded shadow cursor-pointer" onClick={() => handleChatBoxClick(chat)}>
+              <div
+                key={index}
+                className="p-3 m-2 bg-gray-200 rounded shadow cursor-pointer"
+                onClick={() => handleChatBoxClick(chat)}
+              >
                 Chat with: {chat.other_user}
               </div>
             ))}
@@ -101,11 +121,14 @@ const connectToChat = (chat) => {
         <div className="flex justify-evenly items-center bg-white row-span-2 col-start-3 col-end-7">
           <div className="grid items grid-cols-2 grid-rows-6 w-full h-full space-x-0 space-y-0">
             <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center text-center items-center mt-0 h-1/2">
-              Messaging {currentChatUser ? `${currentChatUser}` : ''}
+              Messaging {currentChatUser ? `${currentChatUser}` : ""}
             </header>
             <div className="max-h-96 flex flex-col overflow-auto row-start-2 row-end-6 col-start-1 col-end-3 border border-gray-500 shadow-lg">
               {messages.map((msg, index) => (
-                <div key={index} className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white">
+                <div
+                  key={index}
+                  className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white"
+                >
                   {msg.sender_name}: {msg.content} (sent at {msg.timestamp})
                 </div>
               ))}
@@ -113,18 +136,19 @@ const connectToChat = (chat) => {
             <footer className="flex bg-green-50 mt-auto col-start-1 col-end-3 row-start-6 justify-items-center text-center items-center">
               {}
               <form onSubmit={handleSubmit} className="w-full flex">
-                <input 
-                  type="text" 
-                  id="message_tag" 
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-3/4 p-2.5 mr-2" 
-                  placeholder="Message" 
-                  required 
+                <input
+                  type="text"
+                  id="message_tag"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-3/4 p-2.5 mr-2"
+                  placeholder="Message"
+                  required
                   value={messageText}
                   onChange={handleMessageChange}
                 />
-                <button 
-                  type="submit" 
-                  className="text-white bg-blue-200 hover:bg-blue-500 font-medium rounded text-sm w-1/4 px-5 py-2.5 text-center">
+                <button
+                  type="submit"
+                  className="text-white bg-blue-200 hover:bg-blue-500 font-medium rounded text-sm w-1/4 px-5 py-2.5 text-center"
+                >
                   Send
                 </button>
               </form>
@@ -137,4 +161,3 @@ const connectToChat = (chat) => {
 }
 
 export default Messaging;
-
