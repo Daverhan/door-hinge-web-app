@@ -34,12 +34,11 @@ def create_app():
     Migrate(app, db)
     Session(app)
 
-    socketio.init_app(app, async_mode='threading', cors_allowed_origins=["http://localhost:5173"])
+    socketio.init_app(app, async_mode='threading', cors_allowed_origins=["http://localhost:5173"], manage_session=False, logger=True, engineio_logger=True)
 
     CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": ["http://localhost:5173"]}})
 
     with app.app_context():
-        db.create_all()
         create_roles()
 
     app.register_blueprint(user_bp, url_prefix='/api/users')

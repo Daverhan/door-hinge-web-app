@@ -24,8 +24,9 @@ function Messaging() {
     .catch(error => console.error('Error fetching data: ', error));
   }, []);
 
-  const connectToChat = (username) => {
-    setCurrentChatUser(username);
+const connectToChat = (chat) => {
+    setChatId(chat.chat_id);
+    setCurrentChatUser(chat.other_user);
     if (socket.current) {
       socket.current.disconnect();
     }
@@ -35,25 +36,23 @@ function Messaging() {
       withCredentials: true
     });
 
+    socket.current.emit('join_room', { room: chat.chat_id });
+
     socket.current.on('receive message', (message) => {
-        setMessages(prevMessages => [...prevMessages, {
-          ...message,
-          sender_name: message.sender_name,
-          content: message.content,
-          timestamp: message.timestamp
+      console.log('Received message:', message);
+      setMessages(prevMessages => [...prevMessages, {
+        ...message,
+        sender_name: message.sender_name,
+        content: message.content,
+        timestamp: message.timestamp
       }]);
     });
-
-    socket.current.on('user connected', (data) => {
-        console.log(`${data.user} has joined the chat!`);
-    });
-
   };
 
   const handleChatBoxClick = (chat) => {
     setChatId(chat.chat_id);
     setCurrentChatUser(chat.other_user);
-    connectToChat(chat.other_user);
+    connectToChat(chat);
     fetchMessages(chat.chat_id);
   };
 
