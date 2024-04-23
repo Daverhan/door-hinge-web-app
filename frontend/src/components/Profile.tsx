@@ -32,7 +32,7 @@ function Profile() {
         </p>
         <p>ID: {data.id}</p>
         <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
-          onClick={navigateTo("/EditProfile")}>
+          onClick={navigateTo("/edit-profile")}>
           Account Settings
         </button>
       </div>

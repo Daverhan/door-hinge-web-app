@@ -8,59 +8,15 @@ import Profile from "./components/Profile";
 import CreateListing from "./components/CreateListing";
 import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
-<<<<<<< HEAD
-import EditProfile from "./components/EditProfile";
-import ResetPassword from "./components/ResetPassword";
-import Goodbye from "./components/Goodbye";
-=======
 import Moderator from "./components/Moderator";
+import EditProfile from "./components/EditProfile";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
->>>>>>> origin/main
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
     <Router>
-<<<<<<< HEAD
-      <main>
-        <Routes>
-          <Route path="/" element={<Welcome />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/makeaccount" element={<MakeAccount />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="/EditProfile" element={<EditProfile />} />
-          <Route path="/ResetPassword" element={<ResetPassword />} />
-          <Route path="/Goodbye" element={<Goodbye />} />
-          <Route
-            path="/home"
-            element={
-              <>
-                <Navbar />
-                <Home />
-              </>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <>
-                <Navbar />
-                <Profile />
-              </>
-            }
-          />
-          <Route
-            path="/create-listing"
-            element={
-              <>
-                <Navbar />
-                <CreateListing />
-              </>
-            }
-          />
-        </Routes>
-      </main>
-=======
       <AuthProvider>
         <main>
           <Routes>
@@ -125,6 +81,16 @@ function App() {
               }
             />
             <Route
+              path="/edit-profile"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <EditProfile />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/moderator"
               element={
                 <ProtectedRoute>
@@ -134,11 +100,20 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/reset-password"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <ResetPassword />
+                  </>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
       </AuthProvider>
->>>>>>> origin/main
-    </Router>
+    </Router >
   );
 }
 
