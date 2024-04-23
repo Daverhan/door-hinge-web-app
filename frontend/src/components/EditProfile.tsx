@@ -20,6 +20,7 @@ function EditProfile() {
         last_name: "",
         username: "",
         id: "",
+        email: "",
     });
 
     const navigate = useNavigate();
@@ -49,6 +50,7 @@ function EditProfile() {
             first_name: formData.get("first-name"),
             last_name: formData.get("last-name"),
             username: formData.get("username"),
+            email: formData.get("email")
         };
 
         Object.values(formValues).forEach((value) => {
@@ -177,6 +179,22 @@ function EditProfile() {
                                     name="username"
                                     autoComplete="username"
                                     defaultValue={data.username}
+                                ></input>
+                            </div>
+                            <div className="w-full px-3">
+                                <label
+                                    htmlFor="email"
+                                    className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2"
+                                >
+                                    Email
+                                </label>
+                                <input
+                                    className="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                                    id="email"
+                                    type="email"
+                                    name="email"
+                                    autoComplete="email"
+                                    defaultValue={data.email}
                                 ></input>
                             </div>
                         </div>
