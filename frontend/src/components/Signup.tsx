@@ -121,6 +121,7 @@ function MakeAccount() {
       if (response.status === 409) {
         setError409Flag(true);
       } else if (response.ok) {
+        sessionStorage.setItem('username', formValues.username);
         navigate("/home");
       } else {
         setServerErrorFlag(true);

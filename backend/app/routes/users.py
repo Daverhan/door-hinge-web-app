@@ -248,32 +248,6 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 '''
 
 
-@user_bp.route('<int:user_id>/chats', methods=['POST'])
-def create_user_chat(user_id):
-    user = User.query.get(user_id)
-
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-
-    chat = Chat()
-    db.session.add(chat)
-    db.session.commit()
-
-    new_association = {'user_id': user_id, 'chat_id': chat.id}
-    db.session.execute(user_chat_association.insert().values(new_association))
-    db.session.commit()
-
-    return jsonify({'message': 'Chat created successfully', 'chat_id': chat.id, 'user_id': user.id}), 201
-
-
-'''
-IMPORTANT:
-THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
-- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
-- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
-'''
-
-
 @user_bp.route('<int:user_id>/chats/<int:chat_id>', methods=['DELETE'])
 def delete_user_chat(user_id, chat_id):
     user = User.query.get(user_id)
@@ -302,45 +276,39 @@ def delete_user_chat(user_id, chat_id):
     return jsonify({'message': 'Chat successfully removed from the user'}), 200
 
 
-'''
-IMPORTANT:
-THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
-- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
-- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
-'''
-
-
 @user_bp.route('<int:user_id>/chats/<int:chat_id>/messages', methods=['POST'])
 def create_message(user_id, chat_id):
-    message_json = request.get_json()
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
 
-    user = User.query.get(user_id)
-    chat = Chat.query.get(chat_id)
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        message_json = request.get_json()
 
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+        user = user_db_session.query(User).get(user_id)
+        chat = user_db_session.query(Chat).get(chat_id)
 
-    if not chat:
-        return jsonify({'error': 'Chat not found'}), 404
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        if not chat:
+            return jsonify({'error': 'Chat not found'}), 404
 
-    association_exists = db.session.query(db.exists().where(
-        (user_chat_association.c.user_id == user_id) &
-        (user_chat_association.c.chat_id == chat_id)
-    )).scalar()
+        association_exists = user_db_session.query(db.exists().where(
+            (user_chat_association.c.user_id == user_id) &
+            (user_chat_association.c.chat_id == chat_id)
+        )).scalar()
+        if not association_exists:
+            return jsonify({'error': 'No such chat found for the user'}), 404
 
-    if not association_exists:
-        return jsonify({'error': 'No such chat found for the user'}), 404
+        if 'content' not in message_json or not message_json['content'].strip():
+            return jsonify({'error': 'Missing message content'})
 
-    if 'content' not in message_json or not (message_json['content']).strip():
-        return jsonify({'error': 'Missing message content'})
+        message = Message(
+            content=message_json['content'], chat_id=chat_id, sender_id=user_id)
+        user_db_session.add(message)
+        user_db_session.commit()
 
-    message = Message(
-        content=message_json['content'], chat_id=chat_id, sender_id=user_id)
-
-    db.session.add(message)
-    db.session.commit()
-
-    return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
+        return jsonify({'message': 'Message successfully created', **message.to_dict()}), 201
 
 
 @user_bp.route('favorite-listings', methods=['POST'])
@@ -352,6 +320,7 @@ def favorite_a_listing_for_user():
     user_id = session.get('user_id')
 
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
         listing_id_json = request.get_json()
 
         if 'listing_id' not in listing_id_json:
@@ -363,6 +332,26 @@ def favorite_a_listing_for_user():
 
         if not listing:
             return jsonify({'error': 'Listing not found'}), 404
+
+        chat = user_db_session.query(Chat).filter_by(
+            user_send=user.username, user_receive=listing.user.username).first()
+
+        if not chat:
+            chat = Chat(user_send=user.username,
+                        user_receive=listing.user.username)
+            user_db_session.add(chat)
+            user_db_session.commit()
+
+            # Create associations for both users
+            new_association = {'user_id': user_id, 'chat_id': chat.id}
+            user_db_session.execute(
+                user_chat_association.insert().values(new_association))
+
+            new_association = {'user_id': listing.user_id, 'chat_id': chat.id}
+            user_db_session.execute(
+                user_chat_association.insert().values(new_association))
+
+            user_db_session.commit()
 
         new_association = {'user_id': user_id, 'listing_id': listing_id}
         user_db_session.execute(
@@ -454,3 +443,69 @@ def pass_a_listing_for_user():
         user_db_session.commit()
 
     return jsonify({'message': 'Listing successfully passed for the user'}), 201
+
+
+@user_bp.route('/favorited_chats', methods=['GET'])
+def get_chats():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
+    user_id = session['user_id']
+
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).get(user_id)
+
+        favorited_listings = user.favorited_listings
+        owned_listings = user.listings
+
+        chats_data = []
+        visited_chats = set()
+
+        process_listings(favorited_listings, user, chats_data, visited_chats)
+        process_listings(owned_listings, user, chats_data, visited_chats)
+
+    return jsonify(chats_data)
+
+
+@user_bp.route('/messages/<int:chat_id>')
+def get_messages(chat_id):
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        messages = user_db_session.query(Message).filter_by(
+            chat_id=chat_id).order_by(Message.timestamp.asc()).all()
+    return jsonify([message.to_dict() for message in messages])
+
+
+def process_listings(listings, user, chats_data, visited_chats):
+    for listing in listings:
+        relevant_users = set()
+
+        # Adds the owner of the listing if the user is a favorite
+        if user in listing.favorited_by_users:
+            relevant_users.add(listing.user.username)
+
+        # Adds users who favorited the user's listing
+        for other_user in listing.favorited_by_users:
+            if other_user.username != user.username:
+                relevant_users.add(other_user.username)
+
+        for other_username in relevant_users:
+            chats = Chat.query.filter(
+                ((Chat.user_send == user.username) & (Chat.user_receive == other_username)) |
+                ((Chat.user_receive == user.username)
+                 & (Chat.user_send == other_username))
+            ).all()
+            for chat in chats:
+                chat_key = tuple(sorted((user.username, other_username)))
+                if chat_key not in visited_chats:
+                    visited_chats.add(chat_key)
+                    chats_data.append({
+                        'chat_id': chat.id,
+                        'other_user': other_username,
+                        'listing_id': listing.id,
+                        'listing_name': listing.name
+                    })
