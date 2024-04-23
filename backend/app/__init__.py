@@ -39,6 +39,7 @@ def create_app():
     CORS(app, supports_credentials=True, resources={r"/api/*": {"origins": ["http://localhost:5173"]}})
 
     with app.app_context():
+        db.create_all()
         create_roles()
 
     app.register_blueprint(user_bp, url_prefix='/api/users')
