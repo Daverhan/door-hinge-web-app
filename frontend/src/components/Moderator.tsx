@@ -22,7 +22,6 @@ function Moderator() {
   }
 
   const removeListing = async (property_id: number) => {
-    console.log(`Attempting to remove listing with ID: ${property_id}`);
     const response = await fetch(`/api/users/moderator/delete`, {
       method: "DELETE",
       headers: {
@@ -129,9 +128,6 @@ function Moderator() {
               </div>
             </Modal>
           )}
-        </section>
-        <section className="pt-16 h-full min-h-screen bg-blue-100">
-          <h1 className="mt-8 text-center text-5xl">You are authorized!</h1>
         </section>
       </>
     );
