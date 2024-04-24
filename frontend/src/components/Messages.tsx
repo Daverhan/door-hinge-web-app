@@ -1,15 +1,15 @@
-import io from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
-import { Chat } from "../interfaces.ts";
+import { Chat, Message } from "../interfaces.ts";
 
 function Messaging() {
-  const [messageText, setMessageText] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [chatId, setChatId] = useState(null);
+  const [messageText, setMessageText] = useState<string>("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [chatId, setChatId] = useState<number | null>(null);
   const [chats, setChats] = useState<Chat[]>([]);
-  const [currentChatUser, setCurrentChatUser] = useState(null);
-  const [username, setUsername] = useState(null);
-  const socket = useRef(null);
+  const [currentChatUser, setCurrentChatUser] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
+  const socket = useRef<Socket | null>(null);
 
   useEffect(() => {
     const storedUsername = sessionStorage.getItem("username");
@@ -27,7 +27,7 @@ function Messaging() {
       .catch((error) => console.error("Error fetching data: ", error));
   }, []);
 
-  const connectToChat = (chat) => {
+  const connectToChat = (chat: Chat) => {
     setChatId(chat.chat_id);
     setCurrentChatUser(chat.other_user);
     if (socket.current) {
@@ -42,7 +42,6 @@ function Messaging() {
     socket.current.emit("join_room", { room: chat.chat_id });
 
     socket.current.on("receive message", (message) => {
-      console.log("Received message:", message);
       setMessages((prevMessages) => [
         ...prevMessages,
         {
@@ -55,14 +54,14 @@ function Messaging() {
     });
   };
 
-  const handleChatBoxClick = (chat) => {
+  const handleChatBoxClick = (chat: Chat) => {
     setChatId(chat.chat_id);
     setCurrentChatUser(chat.other_user);
     connectToChat(chat);
     fetchMessages(chat.chat_id);
   };
 
-  const fetchMessages = (chatId) => {
+  const fetchMessages = (chatId: number) => {
     fetch(
       import.meta.env.VITE_SOCKET_API_TARGET + `/api/users/messages/${chatId}`,
       {
@@ -76,29 +75,20 @@ function Messaging() {
       .catch((error) => console.error("Error fetching messages: ", error));
   };
 
-  const handleMessageChange = (event) => {
+  const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setMessageText(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(
-      "Submitting message:",
-      messageText,
-      "from user:",
-      username,
-      "for chat:",
-      chatId
-    );
-    if (messageText.trim() && chatId && username) {
+
+    if (messageText.trim() && chatId && username && socket.current) {
       socket.current.emit("send_message", {
         chat_id: chatId,
         content: messageText.trim(),
         sender_name: username,
       });
       setMessageText("");
-    } else {
-      console.log("No chat ID or message");
     }
   };
 
