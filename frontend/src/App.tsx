@@ -111,6 +111,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="goodbye"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <Goodbye />
+                  </>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </main>
       </AuthProvider>
