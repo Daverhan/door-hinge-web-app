@@ -5,6 +5,7 @@ from app.models.user import (User, Listing, Chat, Message, user_chat_association
                              user_favorited_listing_association, user_passed_listing_association,
                              MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH,
                              MAX_USERNAME_LENGTH, Address, Image)
+import os
 
 user_bp = Blueprint('user', __name__)
 
@@ -42,12 +43,11 @@ def delete_a_listing_as_moderator():
         return jsonify({'error': 'Listing ID is required.'});
 
     with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
+            image_paths = moderator_db_session.query(Image.path).filter(Image.listing_id == listing_id).all()
+            file_path = '/Users/stephanielarosa/Desktop/FSU/Spring2024/CEN4090L/Capstone Project/door-hinge-web-app/backend/static/images/20240424094237_eea3d931af514701ab55af6b4d03fbca.jpg'
             moderator_db_session.query(Address).filter(Address.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(Image).filter(Image.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(user_favorited_listing_association).filter(user_favorited_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(user_passed_listing_association).filter(user_passed_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
 
             listing_to_delete = moderator_db_session.query(Listing).get(listing_id)
@@ -55,8 +55,16 @@ def delete_a_listing_as_moderator():
                 return jsonify({'error': 'Listing not found.'}), 404
 
             moderator_db_session.delete(listing_to_delete)
-
             moderator_db_session.commit()
+
+            for image_path_tuple in image_paths:
+                image_path = image_path_tuple[0]
+                full_path = os.path.join(os.getcwd(), 'static', image_path)
+
+                try: 
+                    os.remove(full_path)
+                except OSError as e:
+                    print(f"Error deleting image {full_path}")
 
             return jsonify({'message': 'Listing deleted successfully.'}), 200
 
