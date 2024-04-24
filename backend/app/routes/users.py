@@ -183,6 +183,38 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 - API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
 '''
 
+@user_bp.route('/resetpassword', methods=['PUT'])
+def reset_password():
+    user_json = request.get_json()
+
+    # Check if 'password' is provided
+    if 'password' not in user_json or not user_json['password']:
+        return jsonify({'error': 'Password field is required'}), 400
+
+    # Validate password length
+    if len(user_json['password']) > MAX_PASSWORD_LENGTH:
+        return jsonify({'error': 'Password exceeds maximum length allowed', 'code': 'MAX_INPUT_LIMIT'}), 400
+
+    # Fetch the current user based on session ID
+    current_user_id = session.get('user_id')  # Assumes user is logged in and their ID is in session
+    user = User.query.filter_by(id=current_user_id).first()
+
+    if user:
+        # Encrypt the new password and update the user record
+        hashed_password = bcrypt.generate_password_hash(user_json['password']).decode('utf-8')
+        user.password = hashed_password
+        db.session.commit()
+        return jsonify({'message': 'Password reset successfully'}), 200
+    else:
+        return jsonify({'error': 'User not found'}), 404
+
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
+
 
 @user_bp.route('<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
