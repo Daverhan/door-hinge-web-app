@@ -48,6 +48,7 @@ function Login() {
         setEmptyInputFlag(false);
         return;
       } else {
+        sessionStorage.setItem('username', formValues.username);
         navigate("/home");
       }
     };
