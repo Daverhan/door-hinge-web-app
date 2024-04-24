@@ -1,4 +1,4 @@
-from app.extensions import socketio, db
+from app.extensions import socketio
 from app.models.user import User, Chat, Message
 from flask import session
 from flask_socketio import emit, join_room, leave_room, disconnect
@@ -8,10 +8,7 @@ from app.rbac_utilities import safe_db_connection, is_user_authorized
 
 @socketio.on('connect')
 def on_connect():
-    username = session.get('username')
-    if username:
-        print(f"{username} connected.")
-    else:
+    if not session.get('username'):
         disconnect()
 
 
