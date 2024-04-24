@@ -9,6 +9,7 @@ import CreateListing from "./components/CreateListing";
 import Messages from "./components/Messages";
 import Favorites from "./components/Favorites";
 import Moderator from "./components/Moderator";
+import Testmessage from "./components/testmessage";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -21,6 +22,7 @@ function App() {
             <Route path="/" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/testmessage" element={<Testmessage />} />
             <Route
               path="/home"
               element={
