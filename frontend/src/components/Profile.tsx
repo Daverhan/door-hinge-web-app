@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Profile() {
+  const formRef = useRef<HTMLFormElement>(null);
   const navigate = useNavigate();
 
   const navigateTo = (path: string) => () => {
@@ -24,6 +25,40 @@ function Profile() {
       });
   }, []);
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (!formRef.current) {
+      return;
+    }
+
+    e.preventDefault();
+
+    const formData = new FormData(formRef.current);
+
+    const formValues = {
+      first_name: formData.get("first-name"),
+      last_name: formData.get("last-name"),
+      username: formData.get("username"),
+      email: formData.get("email")
+    };
+
+
+    fetch("/api/users/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formValues),
+    }).then((response) => {
+      // if (response.status === 409) {
+      //   setError409Flag(true);
+      // }
+      if (response.ok) {
+        navigate("/goodbye");
+      }
+      // else {
+      //   setServerErrorFlag(true);
+      // }
+    });
+  }
+
   return (
     <section className="bg-blue-100 h-screen pt-16">
       <div className="font-semibold text-xl m-2">
@@ -41,12 +76,14 @@ function Profile() {
           onClick={navigateTo("/reset-password")}>
           Reset Password
         </button>
-        <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full"
-          onClick={navigateTo("/Delete Account")}>
-          Delete Account
-        </button>
+        <form
+          onSubmit={handleSubmit}>
+          <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full">
+            Delete Account
+          </button>
+        </form>
       </div>
-    </section>
+    </section >
   );
 }
 

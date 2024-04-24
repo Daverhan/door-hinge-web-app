@@ -3,13 +3,11 @@ import { useNavigate } from "react-router-dom";
 
 function ResetPassword() {
     const formRef = useRef<HTMLFormElement>(null);
-    const [error409Flag, setError409Flag] = useState(false);
     const [emptyInputFlag, setEmptyInputFlag] = useState(false);
     const [serverErrorFlag, setServerErrorFlag] = useState(false);
-    const [dontMatchFlag, setDontMatchFlag] = useState(false);
+    const [passwordTooLong, setPasswordTooLong] = useState(false);
 
     const MAX_PASSWORD_LENGTH = 100;
-
 
     const navigate = useNavigate();
 
@@ -18,14 +16,15 @@ function ResetPassword() {
             return;
         }
 
+        let emptyInputFields = false;
+        e.preventDefault();
+
         const formData = new FormData(formRef.current);
 
         const formValues = {
             password: formData.get("password"),
             duplicate: formData.get("duplicate")
         };
-
-        let emptyInputFields = false;
 
         Object.values(formValues).forEach((value) => {
             if (!value) {
@@ -40,27 +39,26 @@ function ResetPassword() {
             setEmptyInputFlag(false);
         }
 
-        let dontMatch = false;
+        let inputFieldsTooLong = false;
 
-        if (formValues.password !== formValues.duplicate) {
-            setDontMatchFlag(true);
-            dontMatch = true;
-        }
 
-        if (dontMatch) {
-            return;
+        if (
+            typeof formValues.password === "string" &&
+            formValues.password.length > MAX_PASSWORD_LENGTH
+        ) {
+            setPasswordTooLong(true);
+            inputFieldsTooLong = true;
         } else {
-            setDontMatchFlag(false);
+            setPasswordTooLong(false);
         }
+
+        if (inputFieldsTooLong) return;
 
         fetch("/api/users/resetpassword", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formValues),
         }).then((response) => {
-            if (response.status === 409) {
-                setError409Flag(true);
-            }
             if (response.ok) {
                 navigate("/profile");
             }
@@ -118,27 +116,24 @@ function ResetPassword() {
                                 ></input>
                             </div>
                         </div>
-                        {/* Flags here */}
                         {emptyInputFlag ? (
                             <p className="text-2xl text-center mb-2 text-red-500">
-                                Error: Fields cannot empty
+                                Input fields cannot be empty
                             </p>
                         ) : null}
-                        {dontMatchFlag ? (
+                        {serverErrorFlag ? (
                             <p className="text-2xl text-center mb-2 text-red-500">
-                                Error: Passwords don't match
+                                An Internal Server Error Occurred
                             </p>
                         ) : null}
-                        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
-                        // onClick={navigateTo("/Profile")}
-                        >
-                            Save Changes
+                        <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
+                            Change Password
                         </button>
                         <div className="py-1"></div>
                     </form>
                 </div>
-            </div >
-        </section >
+            </div>
+        </section>
     );
 }
 

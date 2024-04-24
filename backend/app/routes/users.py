@@ -150,7 +150,7 @@ def update_user():
     user_json = request.get_json()
 
     # Define required fields for the update
-    required_fields = ['first_name', 'last_name', 'username']
+    required_fields = ['first_name', 'last_name', 'username', 'email']
     if not all(field in user_json for field in required_fields):
         return jsonify({'error': 'Missing required fields'}), 400
 
@@ -171,6 +171,7 @@ def update_user():
         user.first_name = user_json['first_name']
         user.last_name = user_json['last_name']
         user.username = user_json['username']
+        user.email = user_json['email']
         db.session.commit()
         return jsonify({'message': 'User updated successfully'}), 200
     else:
@@ -201,8 +202,10 @@ def reset_password():
 
     if user:
         # Encrypt the new password and update the user record
+        print(user_json['password'])
         user_json['password'] = bcrypt.generate_password_hash(
             user_json['password'])        
+        user.password = user_json['password']
         db.session.commit()
         return jsonify({'message': 'Password reset successfully'}), 200
     else:
@@ -215,15 +218,22 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 - API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
 '''
 
+@user_bp.route('delete', methods=['DELETE'])
+def delete_user():
+    # Retrieve user_id from session or from a request parameter
+    user_id = session.get('user_id') or request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': 'No user ID provided'}), 400
 
-@user_bp.route('<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
+    # Retrieve the user from the database using the user_id
     user = User.query.get(user_id)
 
+    # Check if the user exists
     if user:
         db.session.delete(user)
         db.session.commit()
-
+        session.pop('user_id', None)  # Remove user_id from session after deletion
         return jsonify({'message': 'User deleted successfully'}), 200
     else:
         return jsonify({'error': 'User not found'}), 404
