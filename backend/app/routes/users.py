@@ -201,8 +201,8 @@ def reset_password():
 
     if user:
         # Encrypt the new password and update the user record
-        hashed_password = bcrypt.generate_password_hash(user_json['password']).decode('utf-8')
-        user.password = hashed_password
+        user_json['password'] = bcrypt.generate_password_hash(
+            user_json['password'])        
         db.session.commit()
         return jsonify({'message': 'Password reset successfully'}), 200
     else:
