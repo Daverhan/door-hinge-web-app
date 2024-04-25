@@ -21,6 +21,19 @@ def create_mysql_user(username, password, role):
         connection.execute(set_default_role_sql)
         connection.execute(flush_privileges_sql)
 
+def update_mysql_user(username = None, password = None):
+    if username and password:
+        with db.engine.connect() as connection:
+            connection.execute(text(
+                           f"ALTER USER '{username}'@'localhost' IDENTIFIED BY '{password}';")
+                           )
+        session['password'] = password
+    if username and not password:
+        with db.engine.connect() as connection:
+            connection.execute(text(
+                           f"RENAME USER '{session['username']}'@localhost TO {username}@localhost;")
+                           )
+        session['username'] = username
 
 def create_roles():
     roles_sql = [text(f"CREATE ROLE IF NOT EXISTS 'user'@'localhost';"),
