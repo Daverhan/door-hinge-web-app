@@ -1,10 +1,11 @@
 from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated, update_mysql_user
 from app.extensions import db, bcrypt
-from flask import Blueprint, jsonify, request, session, make_response
+from flask import Blueprint, jsonify, request, session, make_response, current_app
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
                              user_favorited_listing_association, user_passed_listing_association,
                              MAX_FIRST_NAME_LENGTH, MAX_LAST_NAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_EMAIL_LENGTH,
-                             MAX_USERNAME_LENGTH)
+                             MAX_USERNAME_LENGTH, Address, Image)
+import os
 
 user_bp = Blueprint('user', __name__)
 
@@ -23,9 +24,38 @@ def load_moderator_page():
     authorization = is_user_authorized('moderator')
     if isinstance(authorization, tuple):
         return authorization
+    
+    with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
+        all_listings = moderator_db_session.query(Listing).all()
+        all_listings_data = [listing.to_dict() for listing in all_listings]
+        return jsonify(all_listings_data), 200
 
-    return jsonify({'message': 'Authorized'})
+@user_bp.route('/moderator/delete', methods=['DELETE'])
+def delete_a_listing_as_moderator():
+    authorization = is_user_authorized('moderator')
+    if isinstance(authorization, tuple):
+        return authorization
+    
+    data = request.get_json()
+    listing_id = data.get('listing_id')
 
+    if not listing_id:
+        return jsonify({'error': 'Listing ID is required.'});
+
+    with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
+            moderator_db_session.query(Address).filter(Address.listing_id == listing_id).delete(synchronize_session='fetch')
+            moderator_db_session.query(Image).filter(Image.listing_id == listing_id).delete(synchronize_session='fetch')
+            moderator_db_session.query(user_favorited_listing_association).filter(user_favorited_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
+            moderator_db_session.query(user_passed_listing_association).filter(user_passed_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
+            listing_to_delete = moderator_db_session.query(Listing).get(listing_id)
+            
+            if listing_to_delete is None:
+                return jsonify({'error': 'Listing not found.'}), 404
+
+            moderator_db_session.delete(listing_to_delete)
+            moderator_db_session.commit()
+
+            return jsonify({'message': 'Listing deleted successfully.'}), 200
 
 @user_bp.route('profile', methods=['GET'])
 def get_current_user():
@@ -444,30 +474,32 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 '''
 
 
-@user_bp.route('<int:user_id>/favorite-listings/<int:listing_id>', methods=['DELETE'])
-def unfavorite_a_listing_from_user(user_id, listing_id):
-    user = User.query.get(user_id)
-    listing = Listing.query.get(listing_id)
+@user_bp.route('favorite-listings', methods=['DELETE'])
+def unfavorite_a_listing_from_user():
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+    
+    user_id = session.get('user_id')
 
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
+    listing_id_json = request.get_json()
+    if 'listing_id' not in listing_id_json:
+        return jsonify({'error': 'Missing listing id'}), 404
+    
+    listing_id = listing_id_json['listing_id']
 
-    if not listing:
-        return jsonify({'error': 'Listing not found'}), 404
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        listing = Listing.query.get(listing_id)
+        if not listing:
+            return jsonify({'error': 'Listing not found'}), 404
+        
+        association = user_favorited_listing_association.delete().where(
+            (user_favorited_listing_association.c.user_id == user_id) &
+            (user_favorited_listing_association.c.listing_id == listing_id)
+        )
 
-    association_exists = db.session.query(db.exists().where(
-        (user_favorited_listing_association.c.user_id == user_id) &
-        (user_favorited_listing_association.c.listing_id == listing_id)
-    )).scalar()
-
-    if not association_exists:
-        return jsonify({'error': 'Cannot unfavorite the specified listing from the user as it was not favorited'}), 404
-
-    db.session.execute(user_favorited_listing_association.delete().where(
-        (user_favorited_listing_association.c.user_id == user_id) &
-        (user_favorited_listing_association.c.listing_id == listing_id)
-    ))
-    db.session.commit()
+        db.session.execute(association) 
+        db.session.commit()
 
     return jsonify({'message': 'Listing successfully unfavorited from the user'}), 200
 
