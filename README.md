@@ -7,14 +7,14 @@ users to browse and filter through various property listings, enabling them to p
 favorite the ones that catch their interest. The platform also facilitates communication between
 users, making it a comprehensive tool for property seekers and listers alike.
 
+## Status
+
+🚧 **Work in Progress**: This project is currently under development. Features and documentation may be incomplete or subject to change.
+
 ## Libraries
 - Flask
 - React
 - SQLAlchemy
-
-## Status
-
-🚧 **Work in Progress**: This project is currently under development. Features and documentation may be incomplete or subject to change.
 
 ## Installation
 1. Git clone the repository
