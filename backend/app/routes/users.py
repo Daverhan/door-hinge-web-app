@@ -1,4 +1,4 @@
-from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated
+from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated, update_mysql_user
 from app.extensions import db, bcrypt
 from flask import Blueprint, jsonify, request, session, make_response
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
@@ -172,6 +172,9 @@ def update_user():
         user.last_name = user_json['last_name']
         user.username = user_json['username']
         user.email = user_json['email']
+
+        update_mysql_user(user.username)
+
         db.session.commit()
         return jsonify({'message': 'User updated successfully'}), 200
     else:
@@ -187,6 +190,8 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 @user_bp.route('/resetpassword', methods=['PUT'])
 def reset_password():
     user_json = request.get_json()
+
+    user_id = session.get('user_id')
 
     # Check if 'password' is provided
     if 'password' not in user_json or not user_json['password']:
@@ -205,8 +210,14 @@ def reset_password():
         print(user_json['password'])
         user_json['password'] = bcrypt.generate_password_hash(
             user_json['password'])        
+
         user.password = user_json['password']
         db.session.commit()
+
+        user = User.query.filter_by(id=user_id).first()
+
+        update_mysql_user(user.username, user.password)
+    
         return jsonify({'message': 'Password reset successfully'}), 200
     else:
         return jsonify({'error': 'User not found'}), 404
