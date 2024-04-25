@@ -90,14 +90,10 @@ function Home() {
     let listing_data_json = await listing_response.json();
 
     if (listing_data_json.code === "NO_AVAILABLE_LISTINGS") {
-<<<<<<< HEAD
-      navigate("/home");
-=======
       setNoListingsAlert(true);
       setListing(null);
       setLister(null);
       setDisplayNoListingsImage(true);
->>>>>>> origin/main
       return;
     }
 
