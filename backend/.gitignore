@@ -107,3 +107,4 @@ venv.bak/
 *.swo
 
 # Project Specific
+app/static/images
