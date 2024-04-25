@@ -214,7 +214,8 @@ def reset_password():
         user.password = user_json['password']
         db.session.commit()
 
-        user = User.query.filter_by(id=user_id).first()
+        with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+            user = user_db_session.query(User).filter_by(id=user_id).first()
 
         update_mysql_user(user.username, user.password)
     
