@@ -44,19 +44,15 @@ def delete_a_listing_as_moderator():
 
     with safe_db_connection(session.get('username'), session.get('password')) as moderator_db_session:
             moderator_db_session.query(Address).filter(Address.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(Image).filter(Image.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(user_favorited_listing_association).filter(user_favorited_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
-
             moderator_db_session.query(user_passed_listing_association).filter(user_passed_listing_association.c.listing_id == listing_id).delete(synchronize_session='fetch')
-
             listing_to_delete = moderator_db_session.query(Listing).get(listing_id)
+            
             if listing_to_delete is None:
                 return jsonify({'error': 'Listing not found.'}), 404
 
             moderator_db_session.delete(listing_to_delete)
-
             moderator_db_session.commit()
 
             return jsonify({'message': 'Listing deleted successfully.'}), 200
