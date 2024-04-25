@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 function EditProfile() {
     const formRef = useRef<HTMLFormElement>(null);
     const [error409Flag, setError409Flag] = useState(false);
-    const [emptyInputFlag, setEmptyInputFlag] = useState(false);
     const [serverErrorFlag, setServerErrorFlag] = useState(false);
     const [firstNameTooLong, setfirstNameTooLong] = useState(false);
     const [lastNameTooLong, setLastNameTooLong] = useState(false);
@@ -41,7 +40,6 @@ function EditProfile() {
             return;
         }
 
-        let emptyInputFields = false;
         e.preventDefault();
 
         const formData = new FormData(formRef.current);
@@ -52,20 +50,6 @@ function EditProfile() {
             username: formData.get("username"),
             email: formData.get("email")
         };
-
-        Object.values(formValues).forEach((value) => {
-            if (!value) {
-                setEmptyInputFlag(true);
-                setError409Flag(false);
-                emptyInputFields = true;
-            }
-        });
-
-        if (emptyInputFields) {
-            return;
-        } else {
-            setEmptyInputFlag(false);
-        }
 
         let inputFieldsTooLong = false;
 
@@ -201,11 +185,6 @@ function EditProfile() {
                         {error409Flag ? (
                             <p className="text-2xl text-center mb-2 text-red-500">
                                 A user already exists with the provided username
-                            </p>
-                        ) : null}
-                        {emptyInputFlag ? (
-                            <p className="text-2xl text-center mb-2 text-red-500">
-                                Input fields cannot be empty
                             </p>
                         ) : null}
                         <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">

@@ -168,12 +168,15 @@ def update_user():
     # Update user data
     user = User.query.filter_by(id=current_user_id).first()
     if user:
-        user.first_name = user_json['first_name']
-        user.last_name = user_json['last_name']
-        user.username = user_json['username']
-        user.email = user_json['email']
-
-        update_mysql_user(user.username)
+        if len(user_json['first_name']) != 0:
+            user.first_name = user_json['first_name']
+        if len(user_json['last_name']) != 0:
+            user.last_name = user_json['last_name']
+        if len(user_json['username']) != 0:
+            user.username = user_json['username']
+            update_mysql_user(user.username)
+        if len(user_json['email']) != 0:
+            user.email = user_json['email']
 
         db.session.commit()
         return jsonify({'message': 'User updated successfully'}), 200
