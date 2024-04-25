@@ -26,6 +26,11 @@ user_passed_listing_association = db.Table('user_passed_listing',
                                            db.Column('listing_id', db.Integer, db.ForeignKey(
                                                'listing.id'), primary_key=True))
 
+# DELETE CASCADE IS SUPPOSED TO GO HERE 
+# user_association = db.Table('user',
+#                             db.Column('user_id', db.Integer, db.ForeignKey(
+#                                 'user.id'), primary_key=True),
+#                             db.Colu)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
