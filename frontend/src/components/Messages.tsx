@@ -10,6 +10,13 @@ function Messaging() {
   const [currentChatUser, setCurrentChatUser] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const socket = useRef<Socket | null>(null);
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollTo(0, messageEndRef.current.scrollHeight);
+    }
+  }, [messages]);
 
   useEffect(() => {
     const storedUsername = sessionStorage.getItem("username");
@@ -96,7 +103,7 @@ function Messaging() {
     <section className="bg-blue-100 h-screen pt-16">
       <div className="grid grid-cols-6 divide-x h-screen-adjusted">
         <div className="grid grid-cols-1 col-start-1 col-end-3 h-screen-adjusted w-100">
-          <div className="flex overflow-auto row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
+          <div className="flex flex-col row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
             {chats.map((chat, index) => (
               <div
                 key={index}
@@ -109,19 +116,37 @@ function Messaging() {
           </div>
         </div>
         <div className="flex justify-evenly items-center bg-white row-span-2 col-start-3 col-end-7">
-          <div className="grid items grid-cols-2 grid-rows-6 w-full h-full space-x-0 space-y-0">
-            <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center text-center items-center mt-0 h-1/2">
+          <div className="grid items grid-cols-2 grid-rows-[7%_4fr_10%] w-full h-full space-x-0 space-y-0">
+            <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center text-center items-center mt-0">
               Messaging {currentChatUser ? `${currentChatUser}` : ""}
             </header>
-            <div className="max-h-96 flex flex-col overflow-auto row-start-2 row-end-6 col-start-1 col-end-3 border border-gray-500 shadow-lg">
-              {messages.map((msg, index) => (
-                <div
-                  key={index}
-                  className="message border-solid border-2 border-gray-200 h-24 w-52 p-2 m-2 bg-white"
-                >
-                  {msg.sender_name}: {msg.content} (sent at {msg.timestamp})
-                </div>
-              ))}
+            <div
+              className="h-96 flex flex-col overflow-auto row-start-2 row-end-5 col-start-1 col-end-3 border border-gray-500 shadow-lg"
+              ref={messageEndRef}
+            >
+              {messages.map((msg, index) =>
+                msg.sender_name === username ? (
+                  <div className="grid grid-cols-2">
+                    <div></div>
+                    <div
+                      key={index}
+                      className="message border-solid border-2 border-gray-200 h-32 overflow-hidden break-words p-2 m-2 bg-white"
+                    >
+                      {msg.sender_name}: {msg.content} (sent at {msg.timestamp})
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2">
+                    <div
+                      key={index}
+                      className="message border-solid border-2 border-gray-200 h-32 overflow-hidden break-words p-2 m-2 bg-white"
+                    >
+                      {msg.sender_name}: {msg.content} (sent at {msg.timestamp})
+                    </div>
+                    <div></div>
+                  </div>
+                )
+              )}
             </div>
             <footer className="flex bg-green-50 mt-auto col-start-1 col-end-3 row-start-6 justify-items-center text-center items-center">
               {}

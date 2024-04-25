@@ -1,4 +1,4 @@
-from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated
+from app.rbac_utilities import create_mysql_user, safe_db_connection, is_user_authorized, is_user_authenticated, update_mysql_user
 from app.extensions import db, bcrypt
 from flask import Blueprint, jsonify, request, session, make_response, current_app
 from app.models.user import (User, Listing, Chat, Message, user_chat_association,
@@ -68,7 +68,7 @@ def get_current_user():
     with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
         user = user_db_session.query(User).filter_by(id=user_id).first()
 
-    return jsonify({'id': user.id, 'username': user.username, 'first_name': user.first_name, 'last_name': user.last_name})
+    return jsonify({'id': user.id, 'username': user.username, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
 
 
 '''
@@ -168,7 +168,6 @@ def register_user():
 
     return jsonify({'error': 'Missing required fields'}), 400
 
-
 '''
 IMPORTANT:
 THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
@@ -176,29 +175,86 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 - API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
 '''
 
-
-@user_bp.route('<int:user_id>', methods=['PUT'])
-def update_user(user_id):
+@user_bp.route('/editprofile', methods=['PUT'])
+def update_user():
     user_json = request.get_json()
-    user = User.query.get(user_id)
 
-    updatable_fields = ['first_name', 'last_name',
-                        'email', 'username', 'password']
+    # Define required fields for the update
+    required_fields = ['first_name', 'last_name', 'username', 'email']
+    if not all(field in user_json for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
 
-    if not user:
+    # Check if the update is attempting to use a username that already exists
+    current_user_id = session.get('user_id')  # Get current user ID from session
+    if User.query.filter(User.username == user_json['username'], User.id != current_user_id).first():
+        return jsonify({'error': 'A user already exists with the provided username'}), 409
+
+    # Validate length of each field
+    if (len(user_json['first_name']) > MAX_FIRST_NAME_LENGTH or
+        len(user_json['last_name']) > MAX_LAST_NAME_LENGTH or
+        len(user_json['username']) > MAX_USERNAME_LENGTH):
+        return jsonify({'error': 'One or more input fields are over the maximum character limit', 'code': 'MAX_INPUT_LIMIT'}), 400
+
+    # Update user data
+    user = User.query.filter_by(id=current_user_id).first()
+    if user:
+        if len(user_json['first_name']) != 0:
+            user.first_name = user_json['first_name']
+        if len(user_json['last_name']) != 0:
+            user.last_name = user_json['last_name']
+        if len(user_json['username']) != 0:
+            user.username = user_json['username']
+            update_mysql_user(user.username)
+        if len(user_json['email']) != 0:
+            user.email = user_json['email']
+
+        db.session.commit()
+        return jsonify({'message': 'User updated successfully'}), 200
+    else:
         return jsonify({'error': 'User not found'}), 404
 
-    if not any(field in user_json for field in updatable_fields):
-        return jsonify({'message': 'At least one updatable field must be provided'})
+'''
+IMPORTANT:
+THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRITERIA:
+- API ROUTE IS NEVER USED IN THE CLIENT-SIDE APPLICATION
+- API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
+'''
 
-    for field in updatable_fields:
-        if field in user_json:
-            setattr(user, field, user_json[field])
+@user_bp.route('/resetpassword', methods=['PUT'])
+def reset_password():
+    user_json = request.get_json()
 
-    db.session.commit()
+    user_id = session.get('user_id')
 
-    return jsonify({'message': 'User updated successfully', **user.to_dict()}), 200
+    # Check if 'password' is provided
+    if 'password' not in user_json or not user_json['password']:
+        return jsonify({'error': 'Password field is required'}), 400
 
+    # Validate password length
+    if len(user_json['password']) > MAX_PASSWORD_LENGTH:
+        return jsonify({'error': 'Password exceeds maximum length allowed', 'code': 'MAX_INPUT_LIMIT'}), 400
+
+    # Fetch the current user based on session ID
+    current_user_id = session.get('user_id')  # Assumes user is logged in and their ID is in session
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).filter_by(id=current_user_id).first()
+
+        if user:
+            # Encrypt the new password and update the user record
+            print(user_json['password'])
+            user_json['password'] = bcrypt.generate_password_hash(
+                user_json['password'])        
+
+            user.password = user_json['password']
+            user_db_session.commit()
+
+            user = user_db_session.query(User).filter_by(id=user_id).first()
+
+            update_mysql_user(user.username, user.password)
+        
+            return jsonify({'message': 'Password reset successfully'}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
 
 '''
 IMPORTANT:
@@ -207,15 +263,22 @@ THIS HEADER DENOTES THAT THE FOLLOWING API ROUTE MEETS ONE OF THE FOLLOWING CRIT
 - API ROUTE NEEDS RBAC IMPLEMENTED IN IT IF NECESSARY (A USER DB CONNECTION PERFORMING ACTIONS ON THEIR BEHALF, NOT THE ADMIN DB CONNECTION)
 '''
 
+@user_bp.route('delete', methods=['DELETE'])
+def delete_user():
+    # Retrieve user_id from session or from a request parameter
+    user_id = session.get('user_id') or request.args.get('user_id')
+    
+    if not user_id:
+        return jsonify({'error': 'No user ID provided'}), 400
 
-@user_bp.route('<int:user_id>', methods=['DELETE'])
-def delete_user(user_id):
+    # Retrieve the user from the database using the user_id
     user = User.query.get(user_id)
 
+    # Check if the user exists
     if user:
         db.session.delete(user)
         db.session.commit()
-
+        session.pop('user_id', None)  # Remove user_id from session after deletion
         return jsonify({'message': 'User deleted successfully'}), 200
     else:
         return jsonify({'error': 'User not found'}), 404
