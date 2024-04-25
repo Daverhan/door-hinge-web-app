@@ -203,25 +203,25 @@ def reset_password():
 
     # Fetch the current user based on session ID
     current_user_id = session.get('user_id')  # Assumes user is logged in and their ID is in session
-    user = User.query.filter_by(id=current_user_id).first()
+    with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
+        user = user_db_session.query(User).filter_by(id=current_user_id).first()
 
-    if user:
-        # Encrypt the new password and update the user record
-        print(user_json['password'])
-        user_json['password'] = bcrypt.generate_password_hash(
-            user_json['password'])        
+        if user:
+            # Encrypt the new password and update the user record
+            print(user_json['password'])
+            user_json['password'] = bcrypt.generate_password_hash(
+                user_json['password'])        
 
-        user.password = user_json['password']
-        db.session.commit()
+            user.password = user_json['password']
+            user_db_session.commit()
 
-        with safe_db_connection(session.get('username'), session.get('password')) as user_db_session:
             user = user_db_session.query(User).filter_by(id=user_id).first()
 
-        update_mysql_user(user.username, user.password)
-    
-        return jsonify({'message': 'Password reset successfully'}), 200
-    else:
-        return jsonify({'error': 'User not found'}), 404
+            update_mysql_user(user.username, user.password)
+        
+            return jsonify({'message': 'Password reset successfully'}), 200
+        else:
+            return jsonify({'error': 'User not found'}), 404
 
 '''
 IMPORTANT:
