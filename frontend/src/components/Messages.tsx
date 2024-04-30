@@ -1,6 +1,8 @@
 import { io, Socket } from "socket.io-client";
 import { useEffect, useState, useRef } from "react";
 import { Chat, Message } from "../interfaces.ts";
+import { RxHamburgerMenu } from "react-icons/rx";
+import { IoClose } from "react-icons/io5";
 
 function Messaging() {
   const [messageText, setMessageText] = useState<string>("");
@@ -11,6 +13,28 @@ function Messaging() {
   const [username, setUsername] = useState<string | null>(null);
   const socket = useRef<Socket | null>(null);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+
 
   useEffect(() => {
     if (messageEndRef.current) {
@@ -101,6 +125,23 @@ function Messaging() {
 
   return (
     <section className="bg-blue-100 h-screen pt-16">
+    <div
+      className={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="flex flex-col justify-items-center justify-center text-center items-center p-3 w-full">
+        {chats.map((chat, index) => (
+          <div
+            key={index}
+            className="p-3 m-2 bg-gray-200 rounded shadow cursor-pointer"
+            onClick={() => handleChatBoxClick(chat)}
+          >
+            Chat with: {chat.other_user}
+          </div>
+        ))}
+      </div>
+    </div>
       <div className="grid grid-cols-6 h-screen-adjusted">
         <div className="hidden lg:block grid-cols-1 col-start-1 col-end-3 h-screen-adjusted w-100">
           <div className="flex flex-col row-start-1 row-end-2 col-start-1 col-end-2 justify-items-center justify-center text-center items-center">
@@ -117,8 +158,16 @@ function Messaging() {
         </div>
         <div className="flex justify-evenly items-center bg-white row-span-2 col-start-1 lg:col-start-3 col-end-7">
           <div className="grid items grid-cols-2 grid-rows-[7%_4fr_10%] w-full h-full space-x-0 space-y-0">
-            <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center text-center items-center mt-0">
-              Messaging {currentChatUser ? `${currentChatUser}` : ""}
+            <header className="flex bg-blue-gray-50 col-start-1 col-end-3 justify-items-center justify-center items-center mt-0">
+              <p className="pl-2">Messaging {currentChatUser ? `${currentChatUser}` : ""}</p>
+              <div className="lg:hidden flex items-center justify-end w-full h-full pr-5">
+                {isOpen ? (
+                  <IoClose onClick={toggleMenu}></IoClose>
+                ) : (
+                  <RxHamburgerMenu onClick={toggleMenu}></RxHamburgerMenu>
+                )}
+              </div>
+
             </header>
             <div
               className="flex h-96 flex-col overflow-auto row-start-2 row-end-5 col-start-1 col-end-3 border border-gray-500 shadow-lg"

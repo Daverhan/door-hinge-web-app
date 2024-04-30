@@ -12,7 +12,6 @@ import EditProfile from "./components/EditProfile";
 import ResetPassword from "./components/ResetPassword";
 import Goodbye from "./components/Goodbye";
 import Moderator from "./components/Moderator";
-import Testmessage from "./components/testmessage";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
@@ -25,7 +24,6 @@ function App() {
             <Route path="/" element={<Welcome />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/testmessage" element={<Testmessage />} />
             <Route
               path="/home"
               element={
