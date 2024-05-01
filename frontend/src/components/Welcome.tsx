@@ -8,7 +8,7 @@ function Welcome() {
   };
 
   return (
-    <section className="relative flex flex-col h-screen items-center text-center bg-houses_background bg-blend-overlay bg-white/30 bg-cover">
+    <section className="relative flex flex-col h-screen items-center text-center bg-houses_background bg-blend-overlay bg-white/50 bg-cover">
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="px-40">
           <h1 className="text-3xl mt-4">
