@@ -60,7 +60,7 @@ function Profile() {
   }
 
   return (
-    <section className="bg-blue-100 pt-16">
+    <section className="pt-16">
       <form
         onSubmit={handleSubmit}>
         <div className="font-semibold text-xl m-2">
