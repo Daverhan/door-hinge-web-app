@@ -16,15 +16,15 @@ user_chat_association = db.Table('user_chat',
 
 user_favorited_listing_association = db.Table('user_favorited_listing',
                                               db.Column('user_id', db.Integer, db.ForeignKey(
-                                                  'user.id'), primary_key=True),
+                                                  'user.id', ondelete='CASCADE'), primary_key=True),
                                               db.Column('listing_id', db.Integer, db.ForeignKey(
-                                                  'listing.id'), primary_key=True))
+                                                  'listing.id', ondelete='CASCADE'), primary_key=True))
 
 user_passed_listing_association = db.Table('user_passed_listing',
                                            db.Column('user_id', db.Integer, db.ForeignKey(
-                                               'user.id'), primary_key=True),
+                                               'user.id', ondelete='CASCADE'), primary_key=True),
                                            db.Column('listing_id', db.Integer, db.ForeignKey(
-                                               'listing.id'), primary_key=True))
+                                               'listing.id', ondelete='CASCADE'), primary_key=True))
 
 # DELETE CASCADE IS SUPPOSED TO GO HERE 
 # user_association = db.Table('user',
@@ -136,24 +136,30 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    sender_name = db.Column(db.String(500), nullable=False)
 
     def to_dict(self):
         return {
             'id': self.id,
             'content': self.content,
-            'timestamp': self.timestamp,
+            'timestamp': self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
             'chat_id': self.chat_id,
-            'sender_id': self.sender_id
+            'sender_id': self.sender_id,
+            'sender_name': self.sender_name
         }
 
 
 class Chat(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_send = db.Column(db.String(MAX_FIRST_NAME_LENGTH + MAX_LAST_NAME_LENGTH), nullable=False)
+    user_receive = db.Column(db.String(MAX_FIRST_NAME_LENGTH + MAX_LAST_NAME_LENGTH), nullable=False)
     messages = db.relationship(
         'Message', backref='chat', lazy=True)
 
     def to_dict(self):
         return {
             'id': self.id,
+            'user_send': self.user_send,
+            'user_receive': self.user_receive,
             'messages': [message.to_dict() for message in self.messages]
         }

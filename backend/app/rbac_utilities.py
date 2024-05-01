@@ -43,12 +43,16 @@ def create_roles():
     grants_sql = [
         text(f"GRANT ALL PRIVILEGES ON *.* TO 'admin'@'localhost' WITH GRANT OPTION;"),
         text(f"GRANT 'user'@'localhost' TO 'moderator'@'localhost';"),
+        text(f"GRANT DELETE ON project.user_passed_listing TO 'moderator'@'localhost';"),
         text(f"GRANT SELECT, UPDATE, DELETE ON project.user TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.listing TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT, DELETE ON project.user_favorited_listing TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT ON project.user_passed_listing TO 'user'@'localhost';"),
         text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.address TO 'user'@'localhost';"),
-        text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.image TO 'user'@'localhost';")]
+        text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON project.image TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT ON project.chat TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT ON project.user_chat TO 'user'@'localhost';"),
+        text(f"GRANT SELECT, INSERT ON project.message TO 'user'@'localhost';")]
 
     with db.engine.connect() as connection:
         for sql_statement in roles_sql + grants_sql:
