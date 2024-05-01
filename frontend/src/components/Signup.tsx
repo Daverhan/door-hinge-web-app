@@ -142,7 +142,7 @@ function MakeAccount() {
               <h1 className="text-4xl font-semibold">Sign Up</h1>
               <p className="text-gray-700 py-1">It's quick and easy</p>
             </div>
-            <div className="flex flex-wrap -mx-3">
+            <div className="flex flex-wrap mx-3">
               <div className="relative w-full px-3 mb-2">
                 {firstNameTooLong && (
                   <div className="absolute top-0 pt-4 w-full text-red-500 text-xs">

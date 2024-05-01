@@ -60,4 +60,4 @@ The application should now be running.
 - **Stephanie La Rosa**: Implemented client-side display for users’ favorite listings and added deletion functionality. Developed Moderator functionality that can view all user listings and delete any listing.
 - **Aidan Collins**: Contributed to the client-side design of messaging, database schema, and implemented real-time chat functionality using Flask sockets.
 - **Madeline Whitton**: Developed client-side for login, signup, and a goodbye page upon logout. Implemented server-side routes and update/delete for user profiles.
-- **Omer Tuzun**: Developed client-side design of messaging. Implemented and ensured support for mobile device screens on all pages.
+- **Omer Tuzun**: Developed client-side design of messaging. Implemented and ensured support for mobile device screens on all pages. Redesigned the front-end of the create listings page.
