@@ -60,7 +60,7 @@ function Profile() {
   }
 
   return (
-    <section className="bg-blue-100 h-screen pt-16">
+    <section className="bg-blue-100 pt-16">
       <form
         onSubmit={handleSubmit}>
         <div className="font-semibold text-xl m-2">
@@ -70,17 +70,19 @@ function Profile() {
           </p>
           <p>ID: {data.id}</p>
           <p>Email: {data.email}</p>
-          <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
-            onClick={navigateTo("/edit-profile")}>
-            Account Settings
-          </button>
-          <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
-            onClick={navigateTo("/reset-password")}>
-            Reset Password
-          </button>
-          <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full">
-            Delete Account
-          </button>
+          <div className="flex flex-row justify-center space-x-4">
+            <button className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={navigateTo("/edit-profile")}>
+              Account Settings
+            </button>
+            <button className="flex justify-center bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full"
+              onClick={navigateTo("/reset-password")}>
+              Reset Password
+            </button>
+            <button className="flex justify-center bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded w-full">
+              Delete Account
+            </button>
+          </div>
         </div>
       </form>
     </section >
