@@ -44,7 +44,7 @@ function Favorites() {
   return (
     <section className="pt-16 h-full min-h-screen bg-blue-100">
       <div className="p-4">
-        <h1 className="text-xl font-semibold lg:text-left md:text-left sm:text-center pb-2">Your Favorites</h1>
+        <h1 className="text-xl font-semibold lg:text-left md:text-left text-center pb-2">Your Favorites</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {favorites.map((property) => (
             <div
