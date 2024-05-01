@@ -61,15 +61,13 @@ function Profile() {
   return (
     <section className="bg-blue-100 h-screen pt-16">
       <form onSubmit={handleSubmit}>
-      <div className="font-semibold text-xl m-2">
-          <p>Username: {data.username}</p>
-          <p>
-            Name: {data.first_name} {data.last_name}
-          </p>
-          <p>ID: {data.id}</p>
-          <p>Email: {data.email}</p>
+        <div className="font-semibold text-xl m-2">
+          <p className="lg:text-left md:text-left text-center">Username: {data.username} <br></br>
+          Name: {data.first_name} {data.last_name} <br></br>
+          ID: {data.id} <br></br>
+          Email: {data.email}</p>
           <button
-            className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full"
+            className="flex justify-center bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full mb-5 mt-5"
             onClick={navigateTo("/edit-profile")}
           >
             Account Settings
