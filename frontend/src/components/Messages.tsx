@@ -15,6 +15,9 @@ function Messaging() {
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isSmall, setSmall] = useState(false);
+  const [isMid, setMid] = useState(false);
+  const [isLarge, setLarge] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -25,6 +28,9 @@ function Messaging() {
       if (window.innerWidth >= 1024) {
         setIsOpen(false);
       }
+      setLarge(window.innerWidth >= 960);
+      setMid(window.innerWidth >= 720 && window.innerWidth <= 960 );
+      setSmall(window.innerWidth < 720 );
     };
 
     window.addEventListener("resize", handleResize);
@@ -170,7 +176,8 @@ function Messaging() {
 
             </header>
             <div
-              className="flex h-96 flex-col overflow-auto row-start-2 row-end-5 col-start-1 col-end-3 border border-gray-500 shadow-lg"
+              style={isSmall ? { height : '430px'} : isMid ? {height : '600px'} : isLarge ? {height : '700px'}: { height : '500px' }}
+              className="flex flex-col overflow-auto row-start-2 row-end-5 col-start-1 col-end-3"
               ref={messageEndRef}
             >
               {messages.map((msg, index) =>
