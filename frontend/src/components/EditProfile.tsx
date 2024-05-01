@@ -100,22 +100,16 @@ function EditProfile() {
     });
   };
   return (
-    <section className="bg-blue-100 h-screen pt-16">
-      <div>
-        {/*Mobile Login*/}
-        <div
-        // classNameName={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-        //     }`}
-        ></div>
-        {/*Desktop Login*/}
-        <div className="hidden lg:flex h-full w-full justify-center items-center">
+    <section className="bg-blue-100 h-screen">
+      <div className="min-h-screen flex flex-col w-full justify-center items-center">
+        <div className="flex h-full w-full justify-center items-center">
           <form
             ref={formRef}
             onSubmit={handleSubmit}
             className="w-full max-w-lg py-3 px-5 bg-gray-100 rounded"
           >
             <div className="flex flex-col pb-2">
-              <h1 className="text-4xl font-semibold">Your Account</h1>
+              <h1 className="text-4xl lg:text-left md:text-left text-center font-semibold">Your Account</h1>
             </div>
             <div className="flex flex-wrap -mx-3">
               <div className="w-full px-3">

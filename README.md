@@ -3,7 +3,7 @@
 ## Description
 
 DoorHinge is a web application designed to connect users with their ideal properties. It allows
-users to browse and filter through various property listings, enabling them to pass on or 
+users to browse and filter through various property listings, enabling them to pass on or
 favorite the ones that catch their interest. The platform also facilitates communication between
 users, making it a comprehensive tool for property seekers and listers alike.
 
@@ -60,4 +60,4 @@ The application should now be running.
 - **Stephanie La Rosa**: Implemented client-side display for users’ favorite listings and added deletion functionality. Developed Moderator functionality that can view all user listings and delete any listing.
 - **Aidan Collins**: Contributed to the client-side design of messaging, database schema, and implemented real-time chat functionality using Flask sockets.
 - **Madeline Whitton**: Developed client-side for login, signup, and a goodbye page upon logout. Implemented server-side routes and update/delete for user profiles.
-- **Omer Tuzun**: Started client-side design of messaging.
+- **Omer Tuzun**: Developed client-side design of messaging. Implemented and ensured support for mobile device screens on all pages.

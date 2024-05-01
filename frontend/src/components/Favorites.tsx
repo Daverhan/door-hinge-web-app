@@ -44,7 +44,7 @@ function Favorites() {
   return (
     <section className="pt-16 h-full min-h-screen bg-blue-100">
       <div className="p-4">
-        <h1 className="text-xl font-semibold pb-2">Your Favorites</h1>
+        <h1 className="text-xl font-semibold lg:text-left md:text-left sm:text-center pb-2">Your Favorites</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {favorites.map((property) => (
             <div
@@ -68,7 +68,7 @@ function Favorites() {
                 <p className="text-gray-600">Bedrooms: {property.num_beds}</p>
                 <p className="text-gray-600">Bathrooms: {property.num_baths}</p>
                 <button
-                  className="mt-2 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue700 transition duration-200"
+                  className="mt-2 mr-2 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue700 transition duration-200"
                   onClick={() => openModal(property)}
                 >
                   View Property

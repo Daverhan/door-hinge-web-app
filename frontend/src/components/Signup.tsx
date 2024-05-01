@@ -130,21 +130,15 @@ function MakeAccount() {
   };
 
   return (
-    <section className="bg-blue-100 h-screen pt-16">
+    <section className="bg-blue-100 h-screen">
       <div>
-        {/*Mobile Login*/}
-        <div
-        // classNameName={`lg:hidden text-3xl fixed top-16 bottom-0 left-0 bg-blue-100 w-64 z-10 transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-        //     }`}
-        ></div>
-        {/*Desktop Login*/}
-        <div className="hidden lg:flex h-full w-full justify-center items-center">
+        <div className="min-h-screen flex w-full justify-center items-center">
           <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className="w-full max-w-lg py-3 px-5 bg-gray-100 rounded"
+            className="w-full lg:max-w-lg md:max-w-lg max-w-screen py-3 px-5 bg-gray-100 lg:rounded md:rounded"
           >
-            <div className="flex flex-col pb-2">
+            <div className="flex justify-center lg:text-left md:text-left text-center flex-col pb-2">
               <h1 className="text-4xl font-semibold">Sign Up</h1>
               <p className="text-gray-700 py-1">It's quick and easy</p>
             </div>
