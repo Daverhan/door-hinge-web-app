@@ -544,7 +544,7 @@ function Home() {
             </button>
           </div>
         </div>
-        <div className="flex flex-col h-full w-full justify-center items-center bg-white-100">
+        <div className="hidden lg:flex flex-col h-full w-full justify-center items-center bg-white-100">
         <div
           className="flex-1 flex-grow flex-col overflow-auto w-full border border-gray-500 shadow-lg"
           ref={messageEndRef}
