@@ -46,22 +46,16 @@ function Profile() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formValues),
     }).then((response) => {
-      // if (response.status === 409) {
-      //   setError409Flag(true);
-      // }
       if (response.ok) {
         navigate("/goodbye");
       }
-      // else {
-      //   setServerErrorFlag(true);
-      // }
     });
   };
 
   return (
-    <section className="bg-blue-100 h-screen pt-16">
+    <section className="bg-blue-100 pt-16">
       <form onSubmit={handleSubmit}>
-        <div className="font-semibold text-xl m-2">
+        <div className="font-semibold text-xl mx-2 mt-2">
           <p className="lg:text-left md:text-left text-center">Username: {data.username} <br></br>
           Name: {data.first_name} {data.last_name} <br></br>
           ID: {data.id} <br></br>
