@@ -14,6 +14,7 @@ import Goodbye from "./components/Goodbye";
 import Moderator from "./components/Moderator";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import MyListings from "./components/MyListings";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
                   <>
                     <Navbar />
                     <Profile />
+                    <MyListings />
                   </>
                 </ProtectedRoute>
               }
@@ -117,6 +119,16 @@ function App() {
                 <ProtectedRoute>
                   <>
                     <Goodbye />
+                  </>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-listings"
+              element={
+                <ProtectedRoute>
+                  <>
+                    <MyListings />
                   </>
                 </ProtectedRoute>
               }

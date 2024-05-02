@@ -1,8 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Carousel } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import { User, Listing, FilterFields } from "../interfaces";
 import NoListingsFoundImage from "../assets/no-listings.webp";
+import KrustyKrabAd from "../assets/KrustyKrab.jpg";
+
+import { io, Socket } from "socket.io-client";
+import { Chat, Message } from "../interfaces.ts";
+
 
 function Home() {
   const [listing, setListing] = useState<Listing | null>(null);
@@ -22,6 +27,38 @@ function Home() {
     max_baths: 0,
     zip_code: 0,
   });
+
+  const [messages, setMessages] = useState<Message[]>([]);
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+
+  useEffect(() => {
+    if (messageEndRef.current) {
+      messageEndRef.current.scrollTo(0, messageEndRef.current.scrollHeight);
+    }
+  }, [messages]);
+
+  const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageText(event.target.value);
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
 
   const navigate = useNavigate();
 
@@ -420,10 +457,11 @@ function Home() {
             </button>
           </div>
         </div>
-        <div className="hidden lg:flex h-full w-full justify-center items-center bg-blue-100">
-          <p className="break-words mx-4">
-            This section can be used to directly message the lister
-          </p>
+        <div>
+          <img
+            className="w-full h-screen-adjusted"
+            src={KrustyKrabAd}
+          />
         </div>
       </div>
     </section>

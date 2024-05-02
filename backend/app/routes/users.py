@@ -465,6 +465,29 @@ def get_favorite_a_listing_for_user():
 
     return jsonify(favorites_data), 200
 
+@user_bp.route('my-listings', methods=['GET'])
+def get_your_listings():
+    # Check if the user is authorized
+    authorization = is_user_authorized('user')
+    if isinstance(authorization, tuple):
+        return authorization
+
+    # Assuming the user ID is stored in the session after login
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    try:
+        # Fetch the user and their listings from the database
+        user = User.query.filter_by(id=user_id).one()
+        listings = [listing.to_dict() for listing in user.listings]
+
+        # Return the listings as a JSON response
+        return jsonify(listings)
+
+    except:
+        return jsonify({'error': 'User not found'}), 404
+
 
 '''
 IMPORTANT:

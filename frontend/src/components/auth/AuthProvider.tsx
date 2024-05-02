@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const location = useLocation();
 
   useEffect(() => {
-    const skipAuthRoutes = ["/", "/login", "/signup"];
+    const skipAuthRoutes = ["/", "/login", "/signup", "/testmessage"];
     if (skipAuthRoutes.includes(location.pathname)) {
       return;
     }

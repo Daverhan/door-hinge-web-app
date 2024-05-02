@@ -10,6 +10,13 @@ module.exports = withMT({
       screens: {
         "3xl": "1920px",
       },
+      backgroundImage: {
+        houses_background: "url(/src/assets/HeroImage.jpg)",
+      },
+    },
+    fontFamily: {
+      raleway: ["Raleway", "sans-serif"],
+      poppins: ["Poppins", "sans-serif"],
     },
   },
   plugins: [],
